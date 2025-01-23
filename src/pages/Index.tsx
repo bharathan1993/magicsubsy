@@ -6,7 +6,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 
 export default function Index() {
   return (
-    <div className="p-8">
+    <div className="flex-1 p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Your Subscriptions Overview</h1>
