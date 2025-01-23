@@ -81,7 +81,7 @@ export default function Subscriptions() {
                       <Badge variant="secondary">{subscription.category}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="success" className="bg-green-100 text-green-800">
+                      <Badge variant="default" className="bg-green-100 text-green-800">
                         {subscription.status}
                       </Badge>
                     </TableCell>
