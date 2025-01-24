@@ -9,9 +9,9 @@ export default function Index() {
   return (
     <div className="flex-1 p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">Your Subscriptions Overview</h1>
+        <div className="flex items-center gap-4 mb-8">
           <SidebarTrigger />
+          <h1 className="text-2xl font-bold">Your Subscriptions Overview</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
