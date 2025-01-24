@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -26,9 +25,8 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center p-4">
           <h1 className="text-xl font-bold">SubsTracker</h1>
-          <SidebarTrigger />
         </div>
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
