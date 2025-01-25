@@ -9,6 +9,7 @@ import Subscriptions from "./pages/Subscriptions";
 import Insights from "./pages/Insights";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
+import BudgetGoals from "./pages/BudgetGoals";
 import { AppSidebar } from "./components/layout/AppSidebar";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/insights" element={<Insights />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/budget-goals" element={<BudgetGoals />} />
               </Routes>
             </main>
           </div>
