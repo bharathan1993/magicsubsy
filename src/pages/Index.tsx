@@ -3,7 +3,6 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
 import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { BudgetGoals } from "@/components/dashboard/BudgetGoals";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function Index() {
@@ -51,8 +50,7 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <BudgetGoals />
+        <div className="mb-8">
           <QuickActions />
         </div>
       </div>
