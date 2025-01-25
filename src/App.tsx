@@ -10,6 +10,7 @@ import Insights from "./pages/Insights";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import BudgetGoals from "./pages/BudgetGoals";
+import SubscriptionSharing from "./pages/SubscriptionSharing";
 import { AppSidebar } from "./components/layout/AppSidebar";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/budget-goals" element={<BudgetGoals />} />
+                <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
               </Routes>
             </main>
           </div>

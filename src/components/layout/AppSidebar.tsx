@@ -1,4 +1,4 @@
-import { Home, CreditCard, PieChart, Bell, Settings, Target } from "lucide-react";
+import { Home, CreditCard, PieChart, Bell, Settings, Target, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -16,6 +16,7 @@ const menuItems = [
   { icon: CreditCard, label: "Subscriptions", path: "/subscriptions" },
   { icon: PieChart, label: "Insights", path: "/insights" },
   { icon: Target, label: "Budget Goals", path: "/budget-goals" },
+  { icon: Users, label: "Subscription Sharing", path: "/subscription-sharing" },
   { icon: Bell, label: "Alerts", path: "/alerts" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
