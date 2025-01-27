@@ -4,7 +4,8 @@ import { Users, Calculator, UserPlus, ArrowRight, Search, MapPin } from "lucide-
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { NearbyPartnerRadar } from "@/components/subscription/NearbyPartnerRadar";
 
 export default function SubscriptionSharing() {
   const [location, setLocation] = useState("");
@@ -77,8 +78,6 @@ export default function SubscriptionSharing() {
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Subscription Sharing</h1>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="space-y-1">
@@ -153,37 +152,7 @@ export default function SubscriptionSharing() {
                 </Button>
               </div>
               
-              <div className="space-y-4">
-                {nearbyUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{user.name}</h3>
-                        <Badge variant="secondary">{user.distance}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {user.location} • Joined {user.joinedDate}
-                      </p>
-                      <div className="flex gap-2">
-                        {user.interests.map((interest) => (
-                          <Badge key={interest} variant="outline">
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <Button
-                      className="mt-4 md:mt-0"
-                      onClick={() => handleConnect(user.id)}
-                    >
-                      Connect
-                    </Button>
-                  </div>
-                ))}
-              </div>
+              <NearbyPartnerRadar users={nearbyUsers} onConnect={handleConnect} />
             </div>
           </CardContent>
         </Card>
