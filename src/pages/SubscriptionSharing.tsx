@@ -78,6 +78,7 @@ export default function SubscriptionSharing() {
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="space-y-1">
@@ -129,34 +130,94 @@ export default function SubscriptionSharing() {
           </Card>
         </div>
 
-        {/* New Section: Find Nearby Sharing Partners */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-6 w-6" />
-              Find Nearby Sharing Partners
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <Input
-                  placeholder="Enter your location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="max-w-md"
-                />
-                <Button onClick={handleSearch}>
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
+        {/* Search and Radar Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column: Radar */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-6 w-6" />
+                Find Nearby Sharing Partners
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <Input
+                    placeholder="Enter your location"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="max-w-md"
+                  />
+                  <Button onClick={handleSearch}>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
+                </div>
+                
+                <NearbyPartnerRadar users={nearbyUsers} onConnect={handleConnect} />
               </div>
-              
-              <NearbyPartnerRadar users={nearbyUsers} onConnect={handleConnect} />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
+          {/* Right Column: Detailed List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-6 w-6" />
+                Available Sharing Partners
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {nearbyUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="p-4 rounded-lg border bg-card/50 hover:bg-card/80 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{user.name}</h3>
+                          <Badge variant="secondary" className="text-xs">
+                            {user.distance}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {user.location}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {user.interests.map((interest) => (
+                            <Badge
+                              key={interest}
+                              variant="outline"
+                              className="text-xs px-2"
+                            >
+                              {interest}
+                            </Badge>
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Member since {user.joinedDate}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => handleConnect(user.id)}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Connect
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sharing Opportunities Section */}
         <Card>
           <CardHeader>
             <CardTitle>Sharing Opportunities</CardTitle>
