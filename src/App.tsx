@@ -11,6 +11,7 @@ import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import BudgetGoals from "./pages/BudgetGoals";
 import SubscriptionSharing from "./pages/SubscriptionSharing";
+import CompareServices from "./pages/CompareServices";
 import { AppSidebar } from "./components/layout/AppSidebar";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/budget-goals" element={<BudgetGoals />} />
                 <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
+                <Route path="/compare-services" element={<CompareServices />} />
               </Routes>
             </main>
           </div>
