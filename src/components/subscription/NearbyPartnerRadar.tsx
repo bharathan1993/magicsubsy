@@ -29,16 +29,16 @@ export const NearbyPartnerRadar = ({ users, onConnect }: NearbyPartnerRadarProps
   }, []);
 
   return (
-    <div className="relative w-full h-[500px] bg-background rounded-full mx-auto max-w-[500px] overflow-hidden">
+    <div className="relative w-full h-[400px] bg-black/5 dark:bg-white/5 rounded-lg mx-auto max-w-[400px] overflow-hidden backdrop-blur-sm">
       {/* Radar Animation */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
-        <div className="absolute inset-[25%] border-2 border-primary/15 rounded-full" />
-        <div className="absolute inset-[50%] border border-primary/10 rounded-full" />
+        <div className="absolute inset-0 border border-primary/20 rounded-lg" />
+        <div className="absolute inset-[15%] border border-primary/15 rounded-lg" />
+        <div className="absolute inset-[30%] border border-primary/10 rounded-lg" />
         
         {/* Scanning Line Animation */}
         <motion.div
-          className="absolute top-1/2 left-1/2 w-1 h-[250px] bg-primary/30 origin-bottom"
+          className="absolute top-1/2 left-1/2 w-0.5 h-[200px] bg-primary/20 origin-bottom"
           initial={{ rotate: 0 }}
           animate={{ rotate: 360 }}
           transition={{
@@ -55,10 +55,9 @@ export const NearbyPartnerRadar = ({ users, onConnect }: NearbyPartnerRadarProps
       {/* Users Dots */}
       <AnimatePresence>
         {users.map((user, index) => {
-          // Calculate position based on distance
           const angle = (360 / users.length) * index;
-          const distance = parseInt(user.distance) / 10; // Normalize distance
-          const radius = 200 - (distance * 40); // Adjust dot position based on distance
+          const distance = parseInt(user.distance) / 10;
+          const radius = 160 - (distance * 30);
           
           const x = Math.cos((angle * Math.PI) / 180) * radius;
           const y = Math.sin((angle * Math.PI) / 180) * radius;
@@ -77,26 +76,26 @@ export const NearbyPartnerRadar = ({ users, onConnect }: NearbyPartnerRadarProps
               }}
             >
               <div className="relative group">
-                <div className="w-4 h-4 bg-primary rounded-full animate-pulse" />
+                <div className="w-3 h-3 bg-primary/80 rounded-full animate-pulse" />
                 
                 {/* Hover Card */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="bg-card p-3 rounded-lg shadow-lg min-w-[200px] space-y-2">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                  <div className="bg-card/95 backdrop-blur-sm p-2.5 rounded-lg shadow-lg min-w-[180px] space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-semibold">{user.name}</h4>
-                      <Badge variant="secondary">{user.distance}</Badge>
+                      <h4 className="font-medium text-sm">{user.name}</h4>
+                      <Badge variant="secondary" className="text-xs px-1.5">{user.distance}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{user.location}</p>
                     <div className="flex flex-wrap gap-1">
                       {user.interests.map((interest) => (
-                        <Badge key={interest} variant="outline" className="text-xs">
+                        <Badge key={interest} variant="outline" className="text-[10px] px-1">
                           {interest}
                         </Badge>
                       ))}
                     </div>
                     <Button 
                       size="sm" 
-                      className="w-full mt-2"
+                      className="w-full mt-1.5 h-7 text-xs"
                       onClick={() => onConnect(user.id)}
                     >
                       Connect
