@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Subscriptions from "./pages/Subscriptions";
+import Marketplace from "./pages/Marketplace";
 import Insights from "./pages/Insights";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
@@ -29,6 +30,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/subscriptions" element={<Subscriptions />} />
+                <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/insights" element={<Insights />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/settings" element={<Settings />} />

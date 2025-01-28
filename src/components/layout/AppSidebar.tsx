@@ -1,11 +1,11 @@
-import { Home, CreditCard, PieChart, Bell, Settings, Target, Users, ArrowLeftRight } from "lucide-react";
+import { Home, CreditCard, PieChart, Bell, Settings, Target, Users, ArrowLeftRight, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -14,6 +14,7 @@ import {
 const menuItems = [
   { icon: Home, label: "Dashboard", path: "/" },
   { icon: CreditCard, label: "Subscriptions", path: "/subscriptions" },
+  { icon: Store, label: "Marketplace", path: "/marketplace" },
   { icon: PieChart, label: "Insights", path: "/insights" },
   { icon: Target, label: "Budget Goals", path: "/budget-goals" },
   { icon: Users, label: "Subscription Sharing", path: "/subscription-sharing" },
