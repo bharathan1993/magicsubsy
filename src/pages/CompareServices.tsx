@@ -63,19 +63,19 @@ export default function CompareServices() {
         <div className="grid md:grid-cols-2 gap-8">
           {services.map((service) => (
             <Card key={service.name} className="relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-4 z-10">
                 <Badge variant="secondary" className="bg-primary/10 text-primary">
                   {service.highlight}
                 </Badge>
               </div>
               
               <CardHeader>
-                <CardTitle className="flex justify-between items-center">
+                <CardTitle className="flex flex-col space-y-2">
                   <span className="text-2xl">{service.name}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 text-sm">{service.rating}</span>
+                      <span className="text-sm">{service.rating}</span>
                     </div>
                     <div className="flex items-center text-lg font-bold text-green-600">
                       <DollarSign className="h-4 w-4" />
