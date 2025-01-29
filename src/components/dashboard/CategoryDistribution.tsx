@@ -100,12 +100,12 @@ export function CategoryDistribution() {
             <div className="space-y-1">
               <Progress 
                 value={category.percentage} 
-                className="h-2 bg-gray-100 dark:bg-gray-700"
-                indicatorClassName={
+                className={cn(
+                  "h-2",
                   category.percentage > 30 
                     ? "bg-gradient-to-r from-blue-500 to-indigo-500" 
                     : "bg-gradient-to-r from-purple-500 to-pink-500"
-                }
+                )}
               />
               <p className="text-xs text-muted-foreground">{category.description}</p>
             </div>
