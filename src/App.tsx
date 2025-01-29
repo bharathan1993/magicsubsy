@@ -31,22 +31,22 @@ const App = () => (
           
           {/* App routes with sidebar layout */}
           <Route
-            path="/app"
+            path="/app/*"
             element={
               <SidebarProvider>
                 <div className="flex min-h-screen w-full">
                   <AppSidebar />
                   <main className="flex-1 p-6">
                     <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/subscriptions" element={<Subscriptions />} />
-                      <Route path="/marketplace" element={<Marketplace />} />
-                      <Route path="/insights" element={<Insights />} />
-                      <Route path="/alerts" element={<Alerts />} />
-                      <Route path="/settings" element={<Settings />} />
-                      <Route path="/budget-goals" element={<BudgetGoals />} />
-                      <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
-                      <Route path="/compare-services" element={<CompareServices />} />
+                      <Route index element={<Index />} />
+                      <Route path="subscriptions" element={<Subscriptions />} />
+                      <Route path="marketplace" element={<Marketplace />} />
+                      <Route path="insights" element={<Insights />} />
+                      <Route path="alerts" element={<Alerts />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="budget-goals" element={<BudgetGoals />} />
+                      <Route path="subscription-sharing" element={<SubscriptionSharing />} />
+                      <Route path="compare-services" element={<CompareServices />} />
                     </Routes>
                   </main>
                 </div>
