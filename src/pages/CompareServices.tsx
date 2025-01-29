@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Check, X, Star, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const services = [
   {
@@ -40,6 +41,7 @@ const services = [
 
 export default function CompareServices() {
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
 
   const handleViewDetails = (serviceName: string) => {
     toast({
@@ -60,7 +62,7 @@ export default function CompareServices() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {services.map((service) => (
             <Card key={service.name} className="relative overflow-hidden group hover:shadow-xl transition-shadow duration-300">
               <div className="absolute top-4 right-4 z-10">
@@ -78,8 +80,7 @@ export default function CompareServices() {
                       <span className="text-sm">{service.rating}</span>
                     </div>
                     <div className="flex items-center text-lg font-bold text-green-600">
-                      <DollarSign className="h-4 w-4" />
-                      {service.price}
+                      {formatAmount(service.price)}
                     </div>
                   </div>
                 </CardTitle>

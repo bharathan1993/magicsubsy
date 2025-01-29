@@ -6,9 +6,11 @@ import { Trophy, Target, Award, Edit2, Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export function BudgetGoals() {
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
   const [isEditing, setIsEditing] = useState(false);
   const [monthlyGoal, setMonthlyGoal] = useState(200);
   const [currentSpend, setCurrentSpend] = useState(175);
@@ -50,7 +52,7 @@ export function BudgetGoals() {
     setIsEditing(false);
     toast({
       title: "Budget Updated",
-      description: `Your monthly budget has been set to $${monthlyGoal}`,
+      description: `Your monthly budget has been set to ${formatAmount(monthlyGoal)}`,
     });
   };
 
@@ -113,17 +115,17 @@ export function BudgetGoals() {
                   <Button size="sm" onClick={handleSaveBudget}>Save</Button>
                 </div>
               ) : (
-                <span className="text-sm font-medium">${currentSpend} / ${monthlyGoal}</span>
+                <span className="text-sm font-medium">{formatAmount(currentSpend)} / {formatAmount(monthlyGoal)}</span>
               )}
             </div>
             <Progress value={progress} className="h-2" />
             {progress <= 100 ? (
               <p className="text-xs text-green-600 mt-1">
-                You're on track! ${monthlyGoal - currentSpend} remaining this month
+                You're on track! {formatAmount(monthlyGoal - currentSpend)} remaining this month
               </p>
             ) : (
               <p className="text-xs text-red-600 mt-1">
-                You're over budget by ${currentSpend - monthlyGoal} this month
+                You're over budget by {formatAmount(currentSpend - monthlyGoal)} this month
               </p>
             )}
           </div>

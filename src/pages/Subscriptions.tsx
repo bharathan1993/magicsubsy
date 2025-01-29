@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Calendar, ArrowUpRight } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Mock data - replace with actual data fetching logic
 const subscriptions = [
@@ -35,6 +36,9 @@ const subscriptions = [
 ];
 
 export default function Subscriptions() {
+  const { formatAmount } = useCurrency();
+  const totalMonthly = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
+
   return (
     <div className="p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -43,7 +47,7 @@ export default function Subscriptions() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <span className="text-lg">Total Monthly: ${subscriptions.reduce((acc, sub) => acc + sub.amount, 0).toFixed(2)}</span>
+              <span className="text-lg">Total Monthly: {formatAmount(totalMonthly)}</span>
             </div>
           </div>
         </div>
@@ -69,7 +73,7 @@ export default function Subscriptions() {
                 {subscriptions.map((subscription) => (
                   <TableRow key={subscription.id}>
                     <TableCell className="font-medium">{subscription.name}</TableCell>
-                    <TableCell>${subscription.amount}</TableCell>
+                    <TableCell>{formatAmount(subscription.amount)}</TableCell>
                     <TableCell>{subscription.billingCycle}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Star, Tag, Clock, Shield } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Mock data for marketplace listings
 const marketplaceListings = [
@@ -47,6 +48,7 @@ const marketplaceListings = [
 
 export default function Marketplace() {
   const { toast } = useToast();
+  const { formatAmount } = useCurrency();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const handleSubscribe = (listing: typeof marketplaceListings[0]) => {
@@ -64,89 +66,87 @@ export default function Marketplace() {
 
   return (
     <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Subscription Marketplace
-          </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Discover and subscribe to premium services at exclusive discounts
-          </p>
-        </div>
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Subscription Marketplace
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Discover and subscribe to premium services at exclusive discounts
+        </p>
+      </div>
 
-        <div className="flex gap-2 justify-center flex-wrap">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category)}
-              className="capitalize"
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
+      <div className="flex gap-2 justify-center flex-wrap">
+        {categories.map((category) => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? "default" : "outline"}
+            onClick={() => setSelectedCategory(category)}
+            className="capitalize"
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredListings.map((listing) => (
-            <Card key={listing.id} className="group hover:shadow-lg transition-shadow duration-300">
-              <CardHeader className="relative p-0">
-                <img
-                  src={listing.image}
-                  alt={listing.name}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-                <Badge 
-                  className="absolute top-4 right-4 bg-red-500"
-                >
-                  {listing.discount}% OFF
-                </Badge>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">{listing.name}</CardTitle>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{listing.rating}</span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">{listing.description}</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Tag className="w-4 h-4" />
-                    <span>${listing.price}/month</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Shield className="w-4 h-4" />
-                    <span>{listing.developer}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredListings.map((listing) => (
+          <Card key={listing.id} className="group hover:shadow-lg transition-shadow duration-300">
+            <CardHeader className="relative p-0">
+              <img
+                src={listing.image}
+                alt={listing.name}
+                className="w-full h-48 object-cover rounded-t-lg"
+              />
+              <Badge 
+                className="absolute top-4 right-4 bg-red-500"
+              >
+                {listing.discount}% OFF
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-xl">{listing.name}</CardTitle>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">{listing.rating}</span>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {listing.features.map((feature, index) => (
-                    <div 
-                      key={index}
-                      className="text-xs bg-gray-100 rounded-full px-3 py-1 text-center"
-                    >
-                      {feature}
-                    </div>
-                  ))}
+                <p className="text-sm text-gray-600">{listing.description}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Tag className="w-4 h-4" />
+                  <span>{formatAmount(listing.price)}/month</span>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full"
-                  onClick={() => handleSubscribe(listing)}
-                >
-                  Subscribe Now
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Shield className="w-4 h-4" />
+                  <span>{listing.developer}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {listing.features.map((feature, index) => (
+                  <div 
+                    key={index}
+                    className="text-xs bg-gray-100 rounded-full px-3 py-1 text-center"
+                  >
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                className="w-full"
+                onClick={() => handleSubscribe(listing)}
+              >
+                Subscribe Now
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   );
