@@ -1,21 +1,24 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Charge {
   service: string;
   date: string;
-  amount: string;
+  amount: number;
 }
 
 const charges: Charge[] = [
-  { service: "Netflix", date: "May 26, 2023", amount: "$14.99" },
-  { service: "Spotify", date: "May 28, 2023", amount: "$9.99" },
-  { service: "Adobe Creative Cloud", date: "June 1, 2023", amount: "$52.99" },
-  { service: "Gym Membership", date: "June 5, 2023", amount: "$45.00" },
+  { service: "Netflix", date: "May 26, 2023", amount: 14.99 },
+  { service: "Spotify", date: "May 28, 2023", amount: 9.99 },
+  { service: "Adobe Creative Cloud", date: "June 1, 2023", amount: 52.99 },
+  { service: "Gym Membership", date: "June 5, 2023", amount: 45.00 },
 ];
 
 export function UpcomingCharges() {
+  const { formatAmount } = useCurrency();
+
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -35,7 +38,7 @@ export function UpcomingCharges() {
               <p className="font-medium">{charge.service}</p>
               <p className="text-sm text-muted-foreground">{charge.date}</p>
             </div>
-            <span className="font-semibold">{charge.amount}</span>
+            <span className="font-semibold">{formatAmount(charge.amount)}</span>
           </div>
         ))}
       </div>

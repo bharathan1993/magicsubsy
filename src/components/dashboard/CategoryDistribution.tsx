@@ -5,6 +5,7 @@ import { Info, TrendingUp, TrendingDown } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface Category {
   name: string;
@@ -46,6 +47,8 @@ const categories: Category[] = [
 ];
 
 export function CategoryDistribution() {
+  const { formatAmount } = useCurrency();
+
   const getTrendIcon = (trend: Category["trend"]) => {
     switch (trend) {
       case "up":
@@ -76,7 +79,7 @@ export function CategoryDistribution() {
           </TooltipProvider>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Total Monthly Spend: ${totalAmount.toFixed(2)}
+          Total Monthly Spend: {formatAmount(totalAmount)}
         </p>
       </div>
       
@@ -90,7 +93,7 @@ export function CategoryDistribution() {
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-sm font-mono text-muted-foreground">
-                  ${category.amount.toFixed(2)}
+                  {formatAmount(category.amount)}
                 </span>
                 <span className="text-sm font-medium w-12 text-right">
                   {category.percentage}%

@@ -23,9 +23,10 @@ export default function Index() {
           />
           <StatsCard
             title="Monthly Spend"
-            value="$249.99"
+            value={249.99}
             subtitle="+$49.99 from last month"
             icon={<DollarSign className="h-6 w-6" />}
+            isCurrency={true}
           />
           <StatsCard
             title="Active Alerts"
@@ -35,9 +36,10 @@ export default function Index() {
           />
           <StatsCard
             title="Potential Savings"
-            value="$75.00"
+            value={75.00}
             subtitle="From 3 unused subscriptions"
             icon={<TrendingDown className="h-6 w-6" />}
+            isCurrency={true}
           />
         </div>
 
