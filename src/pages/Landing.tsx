@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { StatsSection } from "@/components/landing/StatsSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 
 export default function Landing() {
   return (
@@ -10,6 +11,7 @@ export default function Landing() {
         <FeaturesGrid />
         <StatsSection />
       </div>
+      <TestimonialsSection />
     </div>
   );
 }
