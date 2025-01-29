@@ -14,6 +14,8 @@ import Settings from "./pages/Settings";
 import BudgetGoals from "./pages/BudgetGoals";
 import SubscriptionSharing from "./pages/SubscriptionSharing";
 import CompareServices from "./pages/CompareServices";
+import Account from "./pages/Account";
+import Billing from "./pages/Billing";
 import { AppSidebar } from "./components/layout/AppSidebar";
 import { AccountButton } from "./components/layout/AccountButton";
 
@@ -51,6 +53,8 @@ const App = () => (
                       <Route path="budget-goals" element={<BudgetGoals />} />
                       <Route path="subscription-sharing" element={<SubscriptionSharing />} />
                       <Route path="compare-services" element={<CompareServices />} />
+                      <Route path="account" element={<Account />} />
+                      <Route path="billing" element={<Billing />} />
                     </Routes>
                   </main>
                 </div>
