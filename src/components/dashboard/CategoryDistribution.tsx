@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Info, TrendingUp, TrendingDown } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface Category {
   name: string;
