@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import Subscriptions from "./pages/Subscriptions";
 import Marketplace from "./pages/Marketplace";
 import Insights from "./pages/Insights";
@@ -23,24 +24,29 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/subscriptions" element={<Subscriptions />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/insights" element={<Insights />} />
-                <Route path="/alerts" element={<Alerts />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/budget-goals" element={<BudgetGoals />} />
-                <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
-                <Route path="/compare-services" element={<CompareServices />} />
-              </Routes>
-            </main>
-          </div>
-        </SidebarProvider>
+        <Routes>
+          <Route path="/landing" element={<Landing />} />
+          <Route element={
+            <SidebarProvider>
+              <div className="flex min-h-screen w-full">
+                <AppSidebar />
+                <main className="flex-1">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/subscriptions" element={<Subscriptions />} />
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/insights" element={<Insights />} />
+                    <Route path="/alerts" element={<Alerts />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/budget-goals" element={<BudgetGoals />} />
+                    <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
+                    <Route path="/compare-services" element={<CompareServices />} />
+                  </Routes>
+                </main>
+              </div>
+            </SidebarProvider>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
