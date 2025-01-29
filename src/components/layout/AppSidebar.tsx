@@ -12,15 +12,15 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { icon: Home, label: "Dashboard", path: "/" },
-  { icon: CreditCard, label: "Subscriptions", path: "/subscriptions" },
-  { icon: Store, label: "Marketplace", path: "/marketplace" },
-  { icon: PieChart, label: "Insights", path: "/insights" },
-  { icon: Target, label: "Budget Goals", path: "/budget-goals" },
-  { icon: Users, label: "Subscription Sharing", path: "/subscription-sharing" },
-  { icon: ArrowLeftRight, label: "Compare Services", path: "/compare-services" },
-  { icon: Bell, label: "Alerts", path: "/alerts" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Home, label: "Dashboard", path: "/app" },
+  { icon: CreditCard, label: "Subscriptions", path: "/app/subscriptions" },
+  { icon: Store, label: "Marketplace", path: "/app/marketplace" },
+  { icon: PieChart, label: "Insights", path: "/app/insights" },
+  { icon: Target, label: "Budget Goals", path: "/app/budget-goals" },
+  { icon: Users, label: "Subscription Sharing", path: "/app/subscription-sharing" },
+  { icon: ArrowLeftRight, label: "Compare Services", path: "/app/compare-services" },
+  { icon: Bell, label: "Alerts", path: "/app/alerts" },
+  { icon: Settings, label: "Settings", path: "/app/settings" },
 ];
 
 export function AppSidebar() {

@@ -28,13 +28,15 @@ const App = () => (
           {/* Redirect root to landing page */}
           <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<Landing />} />
+          
+          {/* App routes with sidebar layout */}
           <Route
-            path="/app/*"
+            path="/app"
             element={
               <SidebarProvider>
                 <div className="flex min-h-screen w-full">
                   <AppSidebar />
-                  <main className="flex-1">
+                  <main className="flex-1 p-6">
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/subscriptions" element={<Subscriptions />} />
@@ -45,7 +47,6 @@ const App = () => (
                       <Route path="/budget-goals" element={<BudgetGoals />} />
                       <Route path="/subscription-sharing" element={<SubscriptionSharing />} />
                       <Route path="/compare-services" element={<CompareServices />} />
-                      <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </main>
                 </div>
