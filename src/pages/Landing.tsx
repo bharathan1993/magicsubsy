@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { StatsSection } from "@/components/landing/StatsSection";
+import { SocialProofSection } from "@/components/landing/SocialProofSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { NewsletterSection } from "@/components/landing/NewsletterSection";
@@ -14,6 +15,7 @@ export default function Landing() {
         <FeaturesGrid />
         <StatsSection />
       </div>
+      <SocialProofSection />
       <TestimonialsSection />
       <FAQSection />
       <NewsletterSection />
