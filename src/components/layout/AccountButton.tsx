@@ -1,61 +1,73 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CreditCard, LogOut, User } from "lucide-react";
-import { SignInDialog } from "../auth/SignInDialog";
-import { useToast } from "@/components/ui/use-toast";
+import { SignInDialog } from "@/components/auth/SignInDialog";
+import { User, CreditCard, LogOut } from "lucide-react";
 
 export function AccountButton() {
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
-  const { toast } = useToast();
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   const handleLogout = () => {
-    setIsLoggedOut(true);
-    toast({
-      title: "Logged out successfully",
-      description: "Please sign in to continue",
-    });
+    setIsLoggedIn(false);
+    setIsSignInOpen(true);
   };
 
-  const handleSignIn = () => {
-    setIsLoggedOut(false);
+  const handleSignInSuccess = () => {
+    setIsLoggedIn(true);
+    setIsSignInOpen(false);
   };
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src="/placeholder.svg" alt="Profile" />
+              <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+          </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">User</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                user@example.com
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            Account
+            <span>Account</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem>
             <CreditCard className="mr-2 h-4 w-4" />
-            Billing
+            <span>Billing</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
-            Logout
+            <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {isLoggedOut && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
-          <SignInDialog isOpen={true} onSignIn={handleSignIn} />
-        </div>
-      )}
+      <SignInDialog 
+        open={isSignInOpen} 
+        onOpenChange={setIsSignInOpen}
+        onSignInSuccess={handleSignInSuccess}
+      />
     </>
   );
 }
