@@ -1,9 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Info, TrendingUp, TrendingDown } from "lucide-react";
-import { Tooltip } from "@/components/ui/tooltip";
-import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 import { cn } from "@/lib/utils";
 
 interface Category {
@@ -45,83 +43,84 @@ const categories: Category[] = [
   },
 ];
 
-export function CategoryDistribution() {
-  const getTrendIcon = (trend: Category["trend"]) => {
-    switch (trend) {
-      case "up":
-        return <TrendingUp className="w-4 h-4 text-green-500" />;
-      case "down":
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      default:
-        return null;
-    }
-  };
+const COLORS = ['#4f46e5', '#06b6d4', '#10b981', '#6b7280'];
 
+export function CategoryDistribution() {
   const totalAmount = categories.reduce((sum, category) => sum + category.amount, 0);
 
-  return (
-    <Card className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Subscription Categories</h3>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="w-4 h-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Breakdown of your monthly subscription spending by category</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Total Monthly Spend: ${totalAmount.toFixed(2)}
-        </p>
-      </div>
-      
-      <div className="space-y-6">
-        {categories.map((category) => (
-          <div key={category.name} className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{category.name}</span>
-                {getTrendIcon(category.trend)}
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-mono text-muted-foreground">
-                  ${category.amount.toFixed(2)}
-                </span>
-                <span className="text-sm font-medium w-12 text-right">
-                  {category.percentage}%
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-1">
-              <Progress 
-                value={category.percentage} 
-                className={cn(
-                  "h-2",
-                  category.percentage > 30 
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-500" 
-                    : "bg-gradient-to-r from-purple-500 to-pink-500"
-                )}
-              />
-              <p className="text-xs text-muted-foreground">{category.description}</p>
-            </div>
+  const data = categories.map(category => ({
+    name: category.name,
+    value: category.percentage,
+    amount: category.amount,
+    description: category.description
+  }));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <p className="font-semibold">{data.name}</p>
+          <p className="text-sm text-muted-foreground">{data.description}</p>
+          <div className="mt-2 font-mono">
+            <p>${data.amount.toFixed(2)}</p>
+            <p>{data.value}% of total</p>
           </div>
-        ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Category Distribution</h3>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Info className="w-4 h-4 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Breakdown of your monthly subscription spending by category</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-      
-      <div className="mt-6 space-y-2">
-        <Button variant="outline" className="w-full bg-white dark:bg-gray-800">
-          View Detailed Analysis
-        </Button>
-        <p className="text-xs text-center text-muted-foreground">
-          Last updated: {new Date().toLocaleDateString()}
-        </p>
+
+      <div className="h-[300px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={80}
+              paddingAngle={5}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <RechartsTooltip content={<CustomTooltip />} />
+            <Legend 
+              verticalAlign="bottom" 
+              height={36}
+              formatter={(value, entry: any) => (
+                <span className="text-sm">
+                  {value} ({entry.payload.value}%)
+                </span>
+              )}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
+
+      <p className="text-sm text-center text-muted-foreground mt-4">
+        Total Monthly Spend: ${totalAmount.toFixed(2)}
+      </p>
     </Card>
   );
 }
