@@ -25,9 +25,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Redirect root to landing page */}
+          <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<Landing />} />
           <Route
-            path="/*"
+            path="/app/*"
             element={
               <SidebarProvider>
                 <div className="flex min-h-screen w-full">
