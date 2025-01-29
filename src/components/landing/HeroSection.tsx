@@ -20,7 +20,7 @@ export function HeroSection() {
       <div className="flex justify-center gap-4 animate-fade-in delay-200">
         <Button 
           size="lg" 
-          onClick={() => navigate("/app")}
+          onClick={() => navigate("/auth")}
           className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white px-8 transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
         >
           Get Started <ArrowRight className="ml-2" />

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
 import Subscriptions from "./pages/Subscriptions";
 import Marketplace from "./pages/Marketplace";
 import Insights from "./pages/Insights";
@@ -31,6 +32,7 @@ const App = () => (
           {/* Redirect root to landing page */}
           <Route path="/" element={<Navigate to="/landing" replace />} />
           <Route path="/landing" element={<Landing />} />
+          <Route path="/auth" element={<Auth />} />
           
           {/* App routes with sidebar layout */}
           <Route
