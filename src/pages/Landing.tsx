@@ -2,6 +2,9 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { StatsSection } from "@/components/landing/StatsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { FAQSection } from "@/components/landing/FAQSection";
+import { NewsletterSection } from "@/components/landing/NewsletterSection";
+import { ChatWidget } from "@/components/landing/ChatWidget";
 
 export default function Landing() {
   return (
@@ -12,6 +15,9 @@ export default function Landing() {
         <StatsSection />
       </div>
       <TestimonialsSection />
+      <FAQSection />
+      <NewsletterSection />
+      <ChatWidget />
     </div>
   );
 }
