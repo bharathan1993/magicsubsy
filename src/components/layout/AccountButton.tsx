@@ -26,13 +26,27 @@ export function AccountButton() {
     setIsSignInOpen(false);
   };
 
+  // If not logged in, show only the sign in dialog
+  if (!isLoggedIn) {
+    return (
+      <SignInDialog 
+        open={isSignInOpen} 
+        onOpenChange={setIsSignInOpen}
+        onSignInSuccess={handleSignInSuccess}
+      />
+    );
+  }
+
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="/placeholder.svg" alt="Profile" />
+              <AvatarImage 
+                src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d" 
+                alt="Profile" 
+              />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
           </Button>
