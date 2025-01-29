@@ -15,6 +15,7 @@ import BudgetGoals from "./pages/BudgetGoals";
 import SubscriptionSharing from "./pages/SubscriptionSharing";
 import CompareServices from "./pages/CompareServices";
 import { AppSidebar } from "./components/layout/AppSidebar";
+import { AccountButton } from "./components/layout/AccountButton";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,9 @@ const App = () => (
                 <div className="flex min-h-screen w-full">
                   <AppSidebar />
                   <main className="flex-1 p-6">
+                    <div className="flex justify-end mb-6">
+                      <AccountButton />
+                    </div>
                     <Routes>
                       <Route index element={<Index />} />
                       <Route path="subscriptions" element={<Subscriptions />} />
