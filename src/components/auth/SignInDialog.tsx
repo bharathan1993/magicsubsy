@@ -92,7 +92,7 @@ export function SignInDialog({
       const { data: existingUser } = await supabase
         .from('User Accounts')
         .select('user_id')
-        .eq('User Name', email.split('@')[0])
+        .eq('User Name', email)  // Changed: Now checking against full email
         .single();
 
       if (existingUser) {
@@ -124,13 +124,13 @@ export function SignInDialog({
       }
 
       if (authData.user) {
-        // Create the user record in User Accounts table
+        // Create the user record in User Accounts table with full email
         const { error: dbError } = await supabase
           .from('User Accounts')
           .insert([
             {
               user_id: authData.user.id,
-              "User Name": email.split('@')[0],
+              "User Name": email,  // Changed: Now storing full email
               Password: password
             }
           ]);
