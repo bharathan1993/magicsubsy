@@ -6,7 +6,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +23,7 @@ interface SignInDialogProps {
 export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -57,6 +57,16 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -71,6 +81,11 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
         title: "Success",
         description: "Registration successful! Please check your email to verify your account.",
       });
+      
+      // Clear the form
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -158,14 +173,25 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                />
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing up...
+                    Creating Account...
                   </>
                 ) : (
-                  "Sign Up"
+                  "Create Account"
                 )}
               </Button>
             </form>
