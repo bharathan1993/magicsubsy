@@ -53,7 +53,9 @@ export function SignInDialog({
         .eq('user_id', authData.user.id)
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        throw new Error("User account not found. Please sign up first.");
+      }
 
       onSignInSuccess();
       toast({
