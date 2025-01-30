@@ -15,18 +15,21 @@ export type Database = {
           id: number
           Password: string
           "User Name": string | null
+          user_uid: string | null
         }
         Insert: {
           created_at?: string
           id?: number
           Password: string
           "User Name"?: string | null
+          user_uid?: string | null
         }
         Update: {
           created_at?: string
           id?: number
           Password?: string
           "User Name"?: string | null
+          user_uid?: string | null
         }
         Relationships: []
       }
