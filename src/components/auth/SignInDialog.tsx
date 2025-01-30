@@ -86,23 +86,50 @@ export function SignInDialog({
     setLoading(true);
     
     try {
-      // First create the user in Supabase Auth
+      // Check if user already exists first
+      const { data: existingUser } = await supabase
+        .from('User Accounts')
+        .select('user_id')
+        .eq('User Name', email.split('@')[0])
+        .single();
+
+      if (existingUser) {
+        toast({
+          title: "Error",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        // Handle the case where user exists in Auth but not in User Accounts
+        if (authError.message.includes("already registered")) {
+          toast({
+            title: "Error",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw authError;
+      }
 
       if (authData.user) {
-        // Then create the user record in our User Accounts table
+        // Create the user record in User Accounts table
         const { error: dbError } = await supabase
           .from('User Accounts')
           .insert([
             {
               user_id: authData.user.id,
-              "User Name": email.split('@')[0], // Using part of email as username
-              Password: password // Note: This is stored securely as the actual auth is handled by Supabase
+              "User Name": email.split('@')[0],
+              Password: password
             }
           ]);
 
