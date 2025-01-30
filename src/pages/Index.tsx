@@ -1,11 +1,47 @@
+import { useState, useEffect } from "react";
 import { CreditCard, DollarSign, Bell, TrendingDown } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
 import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Welcome } from "@/components/onboarding/Welcome";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Index() {
+  const [showWelcome, setShowWelcome] = useState(false);
+  const { session } = useAuth();
+
+  useEffect(() => {
+    const checkFirstTimeUser = async () => {
+      if (!session?.user?.id) return;
+
+      const { data, error } = await supabase
+        .from('User Accounts')
+        .select('created_at')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error checking first time user:', error);
+        return;
+      }
+
+      // If the user was created in the last minute, show the welcome screen
+      if (data) {
+        const createdAt = new Date(data.created_at);
+        const now = new Date();
+        const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000;
+        if (diffInSeconds < 60) {
+          setShowWelcome(true);
+        }
+      }
+    };
+
+    checkFirstTimeUser();
+  }, [session?.user?.id]);
+
   return (
     <div className="flex-1 p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -55,6 +91,11 @@ export default function Index() {
         <div className="mb-8">
           <QuickActions />
         </div>
+
+        <Welcome 
+          open={showWelcome} 
+          onClose={() => setShowWelcome(false)} 
+        />
       </div>
     </div>
   );
