@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 
 type Currency = {
@@ -26,8 +26,8 @@ type CurrencyContextType = {
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currentCurrency, setCurrentCurrency] = useState<Currency>(currencies[0]);
   const { toast } = useToast();
+  const [currentCurrency, setCurrentCurrency] = useState<Currency>(currencies[0]);
 
   const setCurrency = (code: string) => {
     const currency = currencies.find(c => c.code === code);
@@ -49,14 +49,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     return amount * currentCurrency.rate;
   };
 
+  const value = {
+    currentCurrency,
+    setCurrency,
+    formatAmount,
+    convertAmount,
+    currencies
+  };
+
   return (
-    <CurrencyContext.Provider value={{
-      currentCurrency,
-      setCurrency,
-      formatAmount,
-      convertAmount,
-      currencies
-    }}>
+    <CurrencyContext.Provider value={value}>
       {children}
     </CurrencyContext.Provider>
   );
