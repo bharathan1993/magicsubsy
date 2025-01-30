@@ -12,6 +12,7 @@ export type Database = {
       "User Accounts": {
         Row: {
           created_at: string
+          has_seen_welcome: boolean | null
           id: number
           Password: string
           "User Name": string | null
@@ -19,6 +20,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          has_seen_welcome?: boolean | null
           id?: number
           Password: string
           "User Name"?: string | null
@@ -26,6 +28,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          has_seen_welcome?: boolean | null
           id?: number
           Password?: string
           "User Name"?: string | null

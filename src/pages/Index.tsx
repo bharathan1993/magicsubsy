@@ -14,33 +14,43 @@ export default function Index() {
   const { session } = useAuth();
 
   useEffect(() => {
-    const checkFirstTimeUser = async () => {
+    const checkWelcomeStatus = async () => {
       if (!session?.user?.id) return;
 
       const { data, error } = await supabase
         .from('User Accounts')
-        .select('created_at')
+        .select('has_seen_welcome')
         .eq('user_id', session.user.id)
         .single();
 
       if (error) {
-        console.error('Error checking first time user:', error);
+        console.error('Error checking welcome status:', error);
         return;
       }
 
-      // If the user was created in the last minute, show the welcome screen
-      if (data) {
-        const createdAt = new Date(data.created_at);
-        const now = new Date();
-        const diffInSeconds = (now.getTime() - createdAt.getTime()) / 1000;
-        if (diffInSeconds < 60) {
-          setShowWelcome(true);
-        }
+      if (data && !data.has_seen_welcome) {
+        setShowWelcome(true);
       }
     };
 
-    checkFirstTimeUser();
+    checkWelcomeStatus();
   }, [session?.user?.id]);
+
+  const handleCloseWelcome = async () => {
+    if (!session?.user?.id) return;
+
+    // Update the has_seen_welcome flag in the database
+    const { error } = await supabase
+      .from('User Accounts')
+      .update({ has_seen_welcome: true })
+      .eq('user_id', session.user.id);
+
+    if (error) {
+      console.error('Error updating welcome status:', error);
+    }
+
+    setShowWelcome(false);
+  };
 
   return (
     <div className="flex-1 p-8 bg-gray-50">
@@ -94,7 +104,7 @@ export default function Index() {
 
         <Welcome 
           open={showWelcome} 
-          onClose={() => setShowWelcome(false)} 
+          onClose={handleCloseWelcome} 
         />
       </div>
     </div>
