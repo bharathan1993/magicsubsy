@@ -12,24 +12,41 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SignInDialog } from "@/components/auth/SignInDialog";
 import { User, CreditCard, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export function AccountButton() {
   const navigate = useNavigate();
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { session } = useAuth();
+  const { toast } = useToast();
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setIsSignInOpen(true);
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate("/landing");
+      toast({
+        title: "Success",
+        description: "Successfully logged out",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSignInSuccess = () => {
-    setIsLoggedIn(true);
     setIsSignInOpen(false);
+    navigate("/app");
   };
 
   // If not logged in, show only the sign in dialog
-  if (!isLoggedIn) {
+  if (!session) {
     return (
       <SignInDialog 
         open={isSignInOpen} 
@@ -45,20 +62,17 @@ export function AccountButton() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d" 
-                alt="Profile" 
-              />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage src="" alt="Profile" />
+              <AvatarFallback>{session.user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">User</p>
+              <p className="text-sm font-medium leading-none">Account</p>
               <p className="text-xs leading-none text-muted-foreground">
-                user@example.com
+                {session.user.email}
               </p>
             </div>
           </DropdownMenuLabel>
