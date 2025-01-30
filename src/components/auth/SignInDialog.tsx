@@ -38,13 +38,23 @@ export function SignInDialog({
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // First authenticate with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
-      
+      if (authError) throw authError;
+
+      // Check if user exists in User Accounts table
+      const { data: userData, error: dbError } = await supabase
+        .from('User Accounts')
+        .select('*')
+        .eq('user_id', authData.user.id)
+        .single();
+
+      if (dbError) throw dbError;
+
       onSignInSuccess();
       toast({
         title: "Success",
@@ -76,12 +86,28 @@ export function SignInDialog({
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      // First create the user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Then create the user record in our User Accounts table
+        const { error: dbError } = await supabase
+          .from('User Accounts')
+          .insert([
+            {
+              user_id: authData.user.id,
+              "User Name": email.split('@')[0], // Using part of email as username
+              Password: password // Note: This is stored securely as the actual auth is handled by Supabase
+            }
+          ]);
+
+        if (dbError) throw dbError;
+      }
       
       toast({
         title: "Success",

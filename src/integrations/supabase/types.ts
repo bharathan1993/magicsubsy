@@ -15,21 +15,21 @@ export type Database = {
           id: number
           Password: string
           "User Name": string | null
-          user_uid: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
           Password: string
           "User Name"?: string | null
-          user_uid?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
           Password?: string
           "User Name"?: string | null
-          user_uid?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
