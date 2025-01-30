@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { NearbyUserCard } from "@/components/subscription-sharing/NearbyUserCard";
 import { SharingOpportunityCard } from "@/components/subscription-sharing/SharingOpportunityCard";
 import { LocationSearch } from "@/components/subscription-sharing/LocationSearch";
+import { NearbyPartnerRadar } from "@/components/subscription/NearbyPartnerRadar";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Mock data
@@ -148,6 +149,7 @@ export default function SubscriptionSharing() {
                 onLocationChange={setLocation}
                 onSearch={handleSearch}
               />
+              <NearbyPartnerRadar users={nearbyUsers} onConnect={handleConnect} />
               <div className="space-y-4">
                 {nearbyUsers.map((user) => (
                   <NearbyUserCard
