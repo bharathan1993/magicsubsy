@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -24,6 +24,21 @@ import { AccountButton } from "./components/layout/AccountButton";
 
 const queryClient = new QueryClient();
 
+// Protected Route wrapper component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!session) {
+    return <Navigate to="/landing" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CurrencyProvider>
@@ -38,33 +53,35 @@ const App = () => (
               <Route path="/landing" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
               
-              {/* App routes with sidebar layout */}
+              {/* Protected app routes with sidebar layout */}
               <Route
                 path="/app/*"
                 element={
-                  <SidebarProvider>
-                    <div className="flex min-h-screen w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-6">
-                        <div className="flex justify-end mb-6">
-                          <AccountButton />
-                        </div>
-                        <Routes>
-                          <Route index element={<Index />} />
-                          <Route path="subscriptions" element={<Subscriptions />} />
-                          <Route path="marketplace" element={<Marketplace />} />
-                          <Route path="insights" element={<Insights />} />
-                          <Route path="alerts" element={<Alerts />} />
-                          <Route path="settings" element={<Settings />} />
-                          <Route path="budget-goals" element={<BudgetGoals />} />
-                          <Route path="subscription-sharing" element={<SubscriptionSharing />} />
-                          <Route path="compare-services" element={<CompareServices />} />
-                          <Route path="account" element={<Account />} />
-                          <Route path="billing" element={<Billing />} />
-                        </Routes>
-                      </main>
-                    </div>
-                  </SidebarProvider>
+                  <ProtectedRoute>
+                    <SidebarProvider>
+                      <div className="flex min-h-screen w-full">
+                        <AppSidebar />
+                        <main className="flex-1 p-6">
+                          <div className="flex justify-end mb-6">
+                            <AccountButton />
+                          </div>
+                          <Routes>
+                            <Route index element={<Index />} />
+                            <Route path="subscriptions" element={<Subscriptions />} />
+                            <Route path="marketplace" element={<Marketplace />} />
+                            <Route path="insights" element={<Insights />} />
+                            <Route path="alerts" element={<Alerts />} />
+                            <Route path="settings" element={<Settings />} />
+                            <Route path="budget-goals" element={<BudgetGoals />} />
+                            <Route path="subscription-sharing" element={<SubscriptionSharing />} />
+                            <Route path="compare-services" element={<CompareServices />} />
+                            <Route path="account" element={<Account />} />
+                            <Route path="billing" element={<Billing />} />
+                          </Routes>
+                        </main>
+                      </div>
+                    </SidebarProvider>
+                  </ProtectedRoute>
                 }
               />
             </Routes>

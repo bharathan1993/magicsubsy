@@ -1,9 +1,23 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SignInDialog } from "@/components/auth/SignInDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export function HeroSection() {
   const navigate = useNavigate();
+  const [showSignInDialog, setShowSignInDialog] = useState(false);
+  const { toast } = useToast();
+
+  const handleSignInSuccess = () => {
+    setShowSignInDialog(false);
+    navigate("/app");
+    toast({
+      title: "Welcome!",
+      description: "Successfully signed in to your account.",
+    });
+  };
 
   return (
     <div className="relative text-center mb-16 space-y-8 overflow-hidden">
@@ -20,12 +34,19 @@ export function HeroSection() {
       <div className="flex justify-center gap-4 animate-fade-in delay-200">
         <Button 
           size="lg" 
-          onClick={() => navigate("/auth")}
+          onClick={() => setShowSignInDialog(true)}
           className="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white px-8 transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
         >
           Get Started <ArrowRight className="ml-2" />
         </Button>
       </div>
+
+      <SignInDialog
+        open={showSignInDialog}
+        onOpenChange={setShowSignInDialog}
+        onSignInSuccess={handleSignInSuccess}
+        defaultTab="signin"
+      />
     </div>
   );
 }
