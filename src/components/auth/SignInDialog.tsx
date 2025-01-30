@@ -18,9 +18,15 @@ interface SignInDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSignInSuccess: () => void;
+  defaultTab?: "signin" | "signup";
 }
 
-export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDialogProps) {
+export function SignInDialog({ 
+  open, 
+  onOpenChange, 
+  onSignInSuccess,
+  defaultTab = "signin" 
+}: SignInDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -103,10 +109,10 @@ export function SignInDialog({ open, onOpenChange, onSignInSuccess }: SignInDial
         <DialogHeader>
           <DialogTitle>Welcome</DialogTitle>
           <DialogDescription>
-            Sign in to your account or create a new one
+            {defaultTab === "signin" ? "Sign in to your account" : "Create a new account"}
           </DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="signin" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
