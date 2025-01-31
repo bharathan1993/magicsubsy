@@ -20,6 +20,7 @@ import CompareServices from "./pages/CompareServices";
 import Account from "./pages/Account";
 import Billing from "./pages/Billing";
 import Security from "./pages/Security";
+import Reports from "./pages/Reports";
 import { AppSidebar } from "./components/layout/AppSidebar";
 import { AccountButton } from "./components/layout/AccountButton";
 
@@ -79,6 +80,7 @@ const App = () => (
                             <Route path="account" element={<Account />} />
                             <Route path="security" element={<Security />} />
                             <Route path="billing" element={<Billing />} />
+                            <Route path="reports" element={<Reports />} />
                           </Routes>
                         </main>
                       </div>
