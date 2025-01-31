@@ -1,72 +1,21 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignInDialog } from "@/components/auth/SignInDialog";
-import { User, CreditCard, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { ProfileMenuItems } from "./ProfileMenuItems";
 
 export function AccountButton() {
-  const navigate = useNavigate();
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { session } = useAuth();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    async function getProfile() {
-      if (!session?.user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('avatar_url')
-          .eq('id', session.user.id)
-          .maybeSingle();
-          
-        if (error) throw error;
-        if (data) {
-          setAvatarUrl(data.avatar_url);
-        }
-      } catch (error) {
-        console.error('Error loading avatar:', error);
-      }
-    }
-
-    getProfile();
-  }, [session]);
-
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate("/landing");
-      toast({
-        title: "Success",
-        description: "Successfully logged out",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSignInSuccess = () => {
     setIsSignInOpen(false);
-    navigate("/app");
   };
 
   // If not logged in, show only the sign in dialog
@@ -85,35 +34,14 @@ export function AccountButton() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={avatarUrl || ""} alt="Profile" />
-              <AvatarFallback>{session.user.email?.[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <ProfileAvatar />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Account</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {session.user.email}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate('/app/account')}>
-            <User className="mr-2 h-4 w-4" />
-            <span>Account</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/app/billing')}>
-            <CreditCard className="mr-2 h-4 w-4" />
-            <span>Billing</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
+          <ProfileMenuItems 
+            email={session.user.email} 
+            onLogout={() => setIsSignInOpen(false)}
+          />
         </DropdownMenuContent>
       </DropdownMenu>
 
