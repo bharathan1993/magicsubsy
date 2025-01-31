@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { calculateTotalMonthlySpend } from "@/utils/subscriptionCalculations";
-import { StatsCard } from "@/components/dashboard/StatsCard";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
-import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
-import { BudgetGoals } from "@/components/dashboard/BudgetGoals";
+import StatsCard from "@/components/dashboard/StatsCard";
+import QuickActions from "@/components/dashboard/QuickActions";
+import UpcomingCharges from "@/components/dashboard/UpcomingCharges";
+import CategoryDistribution from "@/components/dashboard/CategoryDistribution";
+import BudgetGoals from "@/components/dashboard/BudgetGoals";
 
 export default function Index() {
   const [totalMonthly, setTotalMonthly] = useState(0);
@@ -53,11 +53,12 @@ export default function Index() {
           <StatsCard
             title="Monthly Spend"
             value={totalMonthly}
-            isCurrency={true}
+            type="currency"
           />
           <StatsCard
             title="Active Subscriptions"
             value={subscriptionCount}
+            type="number"
           />
         </div>
 
@@ -67,8 +68,12 @@ export default function Index() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <CategoryDistribution />
-          <BudgetGoals />
+          <Card className="p-6">
+            <CategoryDistribution />
+          </Card>
+          <Card className="p-6">
+            <BudgetGoals />
+          </Card>
         </div>
       </div>
     </div>
