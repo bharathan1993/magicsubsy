@@ -58,6 +58,7 @@ export type Database = {
           id: string
           name: string
           next_billing_date: string
+          subscription_type: string
           updated_at: string | null
           user_id: string
           website_url: string | null
@@ -71,6 +72,7 @@ export type Database = {
           id?: string
           name: string
           next_billing_date: string
+          subscription_type?: string
           updated_at?: string | null
           user_id: string
           website_url?: string | null
@@ -84,6 +86,7 @@ export type Database = {
           id?: string
           name?: string
           next_billing_date?: string
+          subscription_type?: string
           updated_at?: string | null
           user_id?: string
           website_url?: string | null

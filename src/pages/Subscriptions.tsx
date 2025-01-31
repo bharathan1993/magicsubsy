@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar, ArrowUpRight } from "lucide-react";
+import { CreditCard, Calendar, ArrowUpRight, Pencil } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { EditSubscriptionDialog } from "@/components/dashboard/EditSubscriptionDialog";
 
 interface Subscription {
   id: string;
@@ -16,6 +18,8 @@ interface Subscription {
   next_billing_date: string;
   category: string;
   website_url: string | null;
+  activation_date: string;
+  subscription_type: string;
 }
 
 export default function Subscriptions() {
@@ -23,34 +27,48 @@ export default function Subscriptions() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const { session } = useAuth();
   const { toast } = useToast();
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const fetchSubscriptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setSubscriptions(data || []);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load subscriptions. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchSubscriptions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        setSubscriptions(data || []);
-      } catch (error) {
-        console.error("Error fetching subscriptions:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load subscriptions. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
     fetchSubscriptions();
   }, [toast]);
 
+  const handleEditClick = (subscription: Subscription) => {
+    setEditingSubscription(subscription);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditDialogClose = (open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      setEditingSubscription(null);
+      fetchSubscriptions(); // Refresh the list after editing
+    }
+  };
+
   const totalMonthly = subscriptions.reduce((acc, sub) => {
     let monthlyAmount = sub.amount;
-    // Convert amounts to monthly basis
     if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
     if (sub.billing_cycle === "annual") monthlyAmount = sub.amount / 12;
     return acc + monthlyAmount;
@@ -82,6 +100,7 @@ export default function Subscriptions() {
                   <TableHead>Billing Cycle</TableHead>
                   <TableHead>Next Billing</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -103,17 +122,32 @@ export default function Subscriptions() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {subscription.website_url && (
-                        <a
-                          href={subscription.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                      <Badge variant="outline" className="capitalize">
+                        {subscription.subscription_type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditClick(subscription)}
+                          className="h-8 w-8"
                         >
-                          Visit Site
-                          <ArrowUpRight className="w-4 h-4" />
-                        </a>
-                      )}
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        {subscription.website_url && (
+                          <a
+                            href={subscription.website_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                          >
+                            Visit
+                            <ArrowUpRight className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -122,6 +156,11 @@ export default function Subscriptions() {
           </CardContent>
         </Card>
       </div>
+      <EditSubscriptionDialog
+        open={isEditDialogOpen}
+        onOpenChange={handleEditDialogClose}
+        subscription={editingSubscription}
+      />
     </div>
   );
 }

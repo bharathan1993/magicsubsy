@@ -1,52 +1,71 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { Calendar } from "lucide-react";
 
-interface Charge {
-  service: string;
-  date: string;
+interface Subscription {
+  id: string;
+  name: string;
   amount: number;
+  next_billing_date: string;
 }
 
-const charges: Charge[] = [
-  { service: "Netflix", date: "May 26, 2023", amount: 14.99 },
-  { service: "Spotify", date: "May 28, 2023", amount: 9.99 },
-  { service: "Adobe Creative Cloud", date: "June 1, 2023", amount: 52.99 },
-  { service: "Gym Membership", date: "June 5, 2023", amount: 45.00 },
-];
-
 export function UpcomingCharges() {
+  const [upcomingCharges, setUpcomingCharges] = useState<Subscription[]>([]);
   const { formatAmount } = useCurrency();
 
+  useEffect(() => {
+    const fetchUpcomingCharges = async () => {
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("id, name, amount, next_billing_date")
+        .lte("next_billing_date", thirtyDaysFromNow.toISOString().split('T')[0])
+        .gte("next_billing_date", new Date().toISOString().split('T')[0])
+        .order("next_billing_date", { ascending: true });
+
+      if (!error && data) {
+        setUpcomingCharges(data);
+      }
+    };
+
+    fetchUpcomingCharges();
+  }, []);
+
   return (
-    <Card className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h3 className="text-lg font-semibold">Upcoming Charges</h3>
-          <p className="text-sm text-muted-foreground">Next 30 days</p>
-        </div>
-      </div>
-      
-      <div className="space-y-4">
-        {charges.map((charge) => (
-          <div
-            key={charge.service}
-            className="flex items-center justify-between py-2"
-          >
-            <div>
-              <p className="font-medium">{charge.service}</p>
-              <p className="text-sm text-muted-foreground">{charge.date}</p>
+    <Card>
+      <CardHeader>
+        <CardTitle>Upcoming Charges</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {upcomingCharges.map((charge) => (
+            <div
+              key={charge.id}
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
+            >
+              <div className="flex items-center gap-4">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{charge.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(charge.next_billing_date).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <p className="font-medium">{formatAmount(charge.amount)}</p>
             </div>
-            <span className="font-semibold">{formatAmount(charge.amount)}</span>
-          </div>
-        ))}
-      </div>
-      
-      <Button variant="outline" className="w-full mt-6">
-        <Bell className="w-4 h-4 mr-2" />
-        Set Reminders
-      </Button>
+          ))}
+          {upcomingCharges.length === 0 && (
+            <p className="text-center text-muted-foreground">
+              No upcoming charges in the next 30 days
+            </p>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 }
