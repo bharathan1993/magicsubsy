@@ -56,12 +56,6 @@ export default function Reports() {
         description: "Access and download all past invoices and receipts",
         icon: <Receipt className="h-5 w-5" />,
       },
-      {
-        id: "tax-statements",
-        title: "Tax Statements",
-        description: "Yearly tax-compliant reports for business users",
-        icon: <FileText className="h-5 w-5" />,
-      },
     ],
     subscription: [
       {
@@ -89,21 +83,6 @@ export default function Reports() {
         title: "Account Changes Report",
         description: "Track all profile edits, password changes, and contact updates",
         icon: <Activity className="h-5 w-5" />,
-      },
-    ],
-    usage: [
-      {
-        id: "feature-usage",
-        title: "Feature Usage Summary",
-        description: "Analysis of most-used features and services",
-        icon: <BarChart className="h-5 w-5" />,
-        comingSoon: true,
-      },
-      {
-        id: "download-history",
-        title: "Download History",
-        description: "Log of all reports and files downloaded",
-        icon: <Clock className="h-5 w-5" />,
       },
     ],
   };
@@ -147,11 +126,10 @@ export default function Reports() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="financial">Financial Reports</TabsTrigger>
           <TabsTrigger value="subscription">Subscription Reports</TabsTrigger>
           <TabsTrigger value="security">Security Reports</TabsTrigger>
-          <TabsTrigger value="usage">Usage Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="financial" className="grid gap-6 md:grid-cols-2">
@@ -168,12 +146,6 @@ export default function Reports() {
 
         <TabsContent value="security" className="grid gap-6 md:grid-cols-2">
           {reportCategories.security.map((report) => (
-            <ReportCard key={report.id} report={report} />
-          ))}
-        </TabsContent>
-
-        <TabsContent value="usage" className="grid gap-6 md:grid-cols-2">
-          {reportCategories.usage.map((report) => (
             <ReportCard key={report.id} report={report} />
           ))}
         </TabsContent>
