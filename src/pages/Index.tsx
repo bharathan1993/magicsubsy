@@ -62,10 +62,11 @@ export default function Index() {
 
         // Calculate total monthly spending
         const monthly = data?.reduce((acc, sub) => {
-          let amount = sub.amount;
-          if (sub.billing_cycle === "quarterly") amount = amount / 3;
-          if (sub.billing_cycle === "annual") amount = amount / 12;
-          return acc + amount;
+          let monthlyAmount = sub.amount;
+          // Convert amounts to monthly basis
+          if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
+          if (sub.billing_cycle === "annual") monthlyAmount = sub.amount / 12;
+          return acc + monthlyAmount;
         }, 0) || 0;
 
         setTotalMonthly(monthly);
