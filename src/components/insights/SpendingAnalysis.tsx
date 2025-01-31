@@ -22,20 +22,31 @@ export function SpendingAnalysis() {
       const subs = subscriptions || [];
       const amounts = subs.map(sub => ({ name: sub.name, amount: Number(sub.amount) }));
       
+      // Default values for empty data
+      if (amounts.length === 0) {
+        return {
+          highest: { name: 'No subscriptions', amount: 0 },
+          lowest: { name: 'No subscriptions', amount: 0 },
+          average: 0,
+          categoryDistribution: []
+        };
+      }
+
       // Calculate highest and lowest expenses
       const highest = amounts.reduce((max, curr) => 
         curr.amount > max.amount ? curr : max
-      , { name: '', amount: 0 });
+      , amounts[0]);
 
       const lowest = amounts.reduce((min, curr) => 
         curr.amount < min.amount ? curr : min
-      , { name: amounts[0]?.name || '', amount: amounts[0]?.amount || 0 });
+      , amounts[0]);
 
-      const average = amounts.reduce((sum, curr) => sum + curr.amount, 0) / (amounts.length || 1);
+      const average = amounts.reduce((sum, curr) => sum + curr.amount, 0) / amounts.length;
 
       // Calculate category distribution
       const categoryData = subs.reduce((acc: Record<string, number>, curr) => {
-        acc[curr.category] = (acc[curr.category] || 0) + Number(curr.amount);
+        const category = curr.category || 'Uncategorized';
+        acc[category] = (acc[category] || 0) + Number(curr.amount);
         return acc;
       }, {});
 
@@ -60,6 +71,8 @@ export function SpendingAnalysis() {
       </Card>
     );
   }
+
+  const chartData = analysis?.categoryDistribution || [];
 
   return (
     <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
@@ -135,7 +148,7 @@ export function SpendingAnalysis() {
             <ResponsiveContainer width="100%" height="100%">
               <RechartsChart>
                 <Pie
-                  data={analysis?.categoryDistribution || []}
+                  data={chartData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -143,7 +156,7 @@ export function SpendingAnalysis() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {analysis?.categoryDistribution.map((_, index) => (
+                  {chartData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
