@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,32 @@ import { useToast } from "@/components/ui/use-toast";
 export function AccountButton() {
   const navigate = useNavigate();
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { session } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function getProfile() {
+      if (!session?.user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', session.user.id)
+          .maybeSingle();
+          
+        if (error) throw error;
+        if (data) {
+          setAvatarUrl(data.avatar_url);
+        }
+      } catch (error) {
+        console.error('Error loading avatar:', error);
+      }
+    }
+
+    getProfile();
+  }, [session]);
 
   const handleLogout = async () => {
     try {
@@ -62,7 +86,7 @@ export function AccountButton() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarImage src="" alt="Profile" />
+              <AvatarImage src={avatarUrl || ""} alt="Profile" />
               <AvatarFallback>{session.user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
           </Button>
