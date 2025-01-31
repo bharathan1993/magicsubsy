@@ -48,6 +48,45 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          category: string
+          created_at: string | null
+          id: string
+          name: string
+          next_billing_date: string
+          updated_at: string | null
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          amount: number
+          billing_cycle: string
+          category: string
+          created_at?: string | null
+          id?: string
+          name: string
+          next_billing_date: string
+          updated_at?: string | null
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          category?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          next_billing_date?: string
+          updated_at?: string | null
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       "User Accounts": {
         Row: {
           created_at: string

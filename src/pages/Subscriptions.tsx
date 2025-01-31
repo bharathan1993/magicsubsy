@@ -1,43 +1,59 @@
+import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Calendar, ArrowUpRight } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
-// Mock data - replace with actual data fetching logic
-const subscriptions = [
-  {
-    id: 1,
-    name: "Netflix",
-    amount: 15.99,
-    billingCycle: "Monthly",
-    nextBilling: "2024-03-15",
-    category: "Entertainment",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Spotify",
-    amount: 9.99,
-    billingCycle: "Monthly",
-    nextBilling: "2024-03-20",
-    category: "Music",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Adobe Creative Cloud",
-    amount: 52.99,
-    billingCycle: "Monthly",
-    nextBilling: "2024-03-25",
-    category: "Software",
-    status: "Active",
-  },
-];
+interface Subscription {
+  id: string;
+  name: string;
+  amount: number;
+  billing_cycle: string;
+  next_billing_date: string;
+  category: string;
+  website_url: string | null;
+}
 
 export default function Subscriptions() {
   const { formatAmount } = useCurrency();
-  const totalMonthly = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const { session } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setSubscriptions(data || []);
+      } catch (error) {
+        console.error("Error fetching subscriptions:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load subscriptions. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchSubscriptions();
+  }, [toast]);
+
+  const totalMonthly = subscriptions.reduce((acc, sub) => {
+    let amount = sub.amount;
+    if (sub.billing_cycle === "quarterly") amount = amount / 3;
+    if (sub.billing_cycle === "annual") amount = amount / 12;
+    return acc + amount;
+  }, 0);
 
   return (
     <div className="p-8">
@@ -65,7 +81,6 @@ export default function Subscriptions() {
                   <TableHead>Billing Cycle</TableHead>
                   <TableHead>Next Billing</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -74,26 +89,30 @@ export default function Subscriptions() {
                   <TableRow key={subscription.id}>
                     <TableCell className="font-medium">{subscription.name}</TableCell>
                     <TableCell>{formatAmount(subscription.amount)}</TableCell>
-                    <TableCell>{subscription.billingCycle}</TableCell>
+                    <TableCell className="capitalize">{subscription.billing_cycle}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                        {new Date(subscription.nextBilling).toLocaleDateString()}
+                        {new Date(subscription.next_billing_date).toLocaleDateString()}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{subscription.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        {subscription.status}
+                      <Badge variant="secondary" className="capitalize">
+                        {subscription.category}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <button className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-                        Manage
-                        <ArrowUpRight className="w-4 h-4" />
-                      </button>
+                      {subscription.website_url && (
+                        <a
+                          href={subscription.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          Visit Site
+                          <ArrowUpRight className="w-4 h-4" />
+                        </a>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

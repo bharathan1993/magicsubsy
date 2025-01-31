@@ -8,10 +8,22 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Welcome } from "@/components/onboarding/Welcome";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
+
+interface Subscription {
+  id: string;
+  name: string;
+  amount: number;
+  billing_cycle: string;
+  category: string;
+}
 
 export default function Index() {
   const [showWelcome, setShowWelcome] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [totalMonthly, setTotalMonthly] = useState(0);
   const { session } = useAuth();
+  const { formatAmount } = useCurrency();
 
   useEffect(() => {
     const checkWelcomeStatus = async () => {
@@ -36,10 +48,38 @@ export default function Index() {
     checkWelcomeStatus();
   }, [session?.user?.id]);
 
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setSubscriptions(data || []);
+
+        // Calculate total monthly spending
+        const monthly = data?.reduce((acc, sub) => {
+          let amount = sub.amount;
+          if (sub.billing_cycle === "quarterly") amount = amount / 3;
+          if (sub.billing_cycle === "annual") amount = amount / 12;
+          return acc + amount;
+        }, 0) || 0;
+
+        setTotalMonthly(monthly);
+      } catch (error) {
+        console.error("Error fetching subscriptions:", error);
+      }
+    };
+
+    fetchSubscriptions();
+  }, []);
+
   const handleCloseWelcome = async () => {
     if (!session?.user?.id) return;
 
-    // Update the has_seen_welcome flag in the database
     const { error } = await supabase
       .from('User Accounts')
       .update({ has_seen_welcome: true })
@@ -63,27 +103,27 @@ export default function Index() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Total Subscriptions"
-            value="15"
-            subtitle="+2 from last month"
+            value={subscriptions.length.toString()}
+            subtitle={`${subscriptions.length} active subscriptions`}
             icon={<CreditCard className="h-6 w-6" />}
           />
           <StatsCard
             title="Monthly Spend"
-            value={249.99}
-            subtitle="+$49.99 from last month"
+            value={totalMonthly}
+            subtitle="Total monthly cost"
             icon={<DollarSign className="h-6 w-6" />}
             isCurrency={true}
           />
           <StatsCard
             title="Active Alerts"
-            value="3"
-            subtitle="2 renewals, 1 price change"
+            value="0"
+            subtitle="No active alerts"
             icon={<Bell className="h-6 w-6" />}
           />
           <StatsCard
             title="Potential Savings"
-            value={75.00}
-            subtitle="From 3 unused subscriptions"
+            value={0}
+            subtitle="No savings identified yet"
             icon={<TrendingDown className="h-6 w-6" />}
             isCurrency={true}
           />

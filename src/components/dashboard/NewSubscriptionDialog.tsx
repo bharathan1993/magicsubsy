@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NewSubscriptionDialogProps {
   open: boolean;
@@ -31,21 +33,69 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [category, setCategory] = useState("entertainment");
   const { toast } = useToast();
+  const { session } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const calculateNextBillingDate = (cycle: string) => {
+    const today = new Date();
+    switch (cycle) {
+      case "monthly":
+        return new Date(today.setMonth(today.getMonth() + 1));
+      case "quarterly":
+        return new Date(today.setMonth(today.getMonth() + 3));
+      case "annual":
+        return new Date(today.setFullYear(today.getFullYear() + 1));
+      default:
+        return new Date(today.setMonth(today.getMonth() + 1));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically save the subscription to your backend
-    toast({
-      title: "Subscription added",
-      description: "Your new subscription has been successfully added.",
-    });
-    onOpenChange(false);
-    // Reset form
-    setName("");
-    setUrl("");
-    setAmount("");
-    setBillingCycle("monthly");
-    setCategory("entertainment");
+    
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add a subscription.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const nextBillingDate = calculateNextBillingDate(billingCycle);
+      
+      const { error } = await supabase.from("subscriptions").insert({
+        user_id: session.user.id,
+        name,
+        amount: parseFloat(amount),
+        billing_cycle: billingCycle,
+        category,
+        website_url: url || null,
+        next_billing_date: nextBillingDate.toISOString().split('T')[0],
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your new subscription has been successfully added.",
+      });
+      
+      onOpenChange(false);
+      // Reset form
+      setName("");
+      setUrl("");
+      setAmount("");
+      setBillingCycle("monthly");
+      setCategory("entertainment");
+    } catch (error) {
+      console.error("Error adding subscription:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add subscription. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
