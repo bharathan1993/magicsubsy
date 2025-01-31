@@ -22,7 +22,7 @@ export function CategoryDistribution() {
   const { formatAmount } = useCurrency();
   const navigate = useNavigate();
 
-  const { data: categories = [], isLoading } = useQuery({
+  const { data: categories = [], isLoading, error } = useQuery({
     queryKey: ['categoryDistribution'],
     queryFn: async () => {
       const { data: subscriptions, error } = await supabase
@@ -30,6 +30,10 @@ export function CategoryDistribution() {
         .select('category, amount');
       
       if (error) throw error;
+
+      if (!subscriptions || subscriptions.length === 0) {
+        return [];
+      }
 
       // Calculate category totals and percentages
       const categoryTotals: Record<string, number> = {};
@@ -64,10 +68,31 @@ export function CategoryDistribution() {
     }
   };
 
-  const totalAmount = categories.reduce((sum, category) => sum + category.amount, 0);
+  // Initialize totalAmount with proper error handling
+  const totalAmount = Array.isArray(categories) 
+    ? categories.reduce((sum, category) => sum + category.amount, 0)
+    : 0;
 
   if (isLoading) {
     return <Card className="p-6"><div>Loading...</div></Card>;
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <div className="text-red-500">Error loading category distribution</div>
+      </Card>
+    );
+  }
+
+  if (!Array.isArray(categories) || categories.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="text-center text-muted-foreground">
+          No subscription data available
+        </div>
+      </Card>
+    );
   }
 
   return (
