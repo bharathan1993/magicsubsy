@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AvatarUpload } from "@/components/account/AvatarUpload";
@@ -54,19 +54,43 @@ export default function Account() {
         .from("profiles")
         .select()
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
       if (data) {
         setProfile({
           ...data,
           date_of_birth: data.date_of_birth || "",
         });
+      } else {
+        // If no profile exists, create one
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert([{ id: session.user.id, email: session.user.email }]);
+
+        if (insertError) throw insertError;
+        
+        // Fetch the newly created profile
+        const { data: newProfile, error: fetchError } = await supabase
+          .from("profiles")
+          .select()
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (fetchError) throw fetchError;
+        if (newProfile) {
+          setProfile({
+            ...newProfile,
+            date_of_birth: newProfile.date_of_birth || "",
+          });
+        }
       }
     } catch (error) {
+      console.error("Error loading user data:", error);
       toast({
         title: "Error",
-        description: "Error loading user data",
+        description: "Error loading user data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -98,12 +122,21 @@ export default function Account() {
         description: "Profile updated successfully",
       });
     } catch (error) {
+      console.error("Error updating profile:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "Error updating profile. Please try again.",
         variant: "destructive",
       });
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-8 flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   return (
