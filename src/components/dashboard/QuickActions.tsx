@@ -2,10 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, List, X, Settings } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { NewSubscriptionDialog } from "./NewSubscriptionDialog";
 
 export function QuickActions() {
   const [showNewSubscriptionDialog, setShowNewSubscriptionDialog] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <Card className="p-6">
@@ -24,7 +26,11 @@ export function QuickActions() {
         >
           <Plus className="mr-2 h-4 w-4" /> Add New Subscription
         </Button>
-        <Button className="w-full justify-start" variant="outline">
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => navigate('/app/subscriptions')}
+        >
           <List className="mr-2 h-4 w-4" /> Manage Subscriptions
         </Button>
         <Button className="w-full justify-start" variant="outline">

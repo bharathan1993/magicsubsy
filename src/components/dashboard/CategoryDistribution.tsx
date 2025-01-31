@@ -6,8 +6,11 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
-interface Category {
+interface CategorySummary {
   name: string;
   percentage: number;
   amount: number;
@@ -15,41 +18,42 @@ interface Category {
   description: string;
 }
 
-const categories: Category[] = [
-  {
-    name: "Entertainment",
-    percentage: 40,
-    amount: 120.50,
-    trend: "up",
-    description: "Streaming services, gaming subscriptions, and media content"
-  },
-  {
-    name: "Software",
-    percentage: 25,
-    amount: 75.25,
-    trend: "stable",
-    description: "Productivity tools, cloud storage, and development platforms"
-  },
-  {
-    name: "Fitness",
-    percentage: 20,
-    amount: 60.00,
-    trend: "up",
-    description: "Gym memberships, fitness apps, and wellness programs"
-  },
-  {
-    name: "Others",
-    percentage: 15,
-    amount: 45.25,
-    trend: "down",
-    description: "Miscellaneous subscriptions and services"
-  },
-];
-
 export function CategoryDistribution() {
   const { formatAmount } = useCurrency();
+  const navigate = useNavigate();
 
-  const getTrendIcon = (trend: Category["trend"]) => {
+  const { data: categories = [], isLoading } = useQuery({
+    queryKey: ['categoryDistribution'],
+    queryFn: async () => {
+      const { data: subscriptions, error } = await supabase
+        .from('subscriptions')
+        .select('category, amount');
+      
+      if (error) throw error;
+
+      // Calculate category totals and percentages
+      const categoryTotals: Record<string, number> = {};
+      let totalAmount = 0;
+
+      subscriptions.forEach((sub) => {
+        categoryTotals[sub.category] = (categoryTotals[sub.category] || 0) + Number(sub.amount);
+        totalAmount += Number(sub.amount);
+      });
+
+      // Convert to required format
+      const categoryData: CategorySummary[] = Object.entries(categoryTotals).map(([category, amount]) => ({
+        name: category,
+        amount: amount,
+        percentage: Math.round((amount / totalAmount) * 100),
+        trend: "stable", // You could implement trend calculation based on historical data
+        description: `${category} subscriptions and services`
+      }));
+
+      return categoryData.sort((a, b) => b.percentage - a.percentage);
+    }
+  });
+
+  const getTrendIcon = (trend: CategorySummary["trend"]) => {
     switch (trend) {
       case "up":
         return <TrendingUp className="w-4 h-4 text-green-500" />;
@@ -61,6 +65,10 @@ export function CategoryDistribution() {
   };
 
   const totalAmount = categories.reduce((sum, category) => sum + category.amount, 0);
+
+  if (isLoading) {
+    return <Card className="p-6"><div>Loading...</div></Card>;
+  }
 
   return (
     <Card className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
@@ -118,7 +126,11 @@ export function CategoryDistribution() {
       </div>
       
       <div className="mt-6 space-y-2">
-        <Button variant="outline" className="w-full bg-white dark:bg-gray-800">
+        <Button 
+          variant="outline" 
+          className="w-full bg-white dark:bg-gray-800"
+          onClick={() => navigate('/app/insights')}
+        >
           View Detailed Analysis
         </Button>
         <p className="text-xs text-center text-muted-foreground">
