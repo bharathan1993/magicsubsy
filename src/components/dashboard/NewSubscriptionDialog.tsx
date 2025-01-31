@@ -32,20 +32,21 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
   const [amount, setAmount] = useState("");
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [category, setCategory] = useState("entertainment");
+  const [activationDate, setActivationDate] = useState(new Date().toISOString().split('T')[0]);
   const { toast } = useToast();
   const { session } = useAuth();
 
-  const calculateNextBillingDate = (cycle: string) => {
-    const today = new Date();
+  const calculateNextBillingDate = (activationDate: string, cycle: string) => {
+    const date = new Date(activationDate);
     switch (cycle) {
       case "monthly":
-        return new Date(today.setMonth(today.getMonth() + 1));
+        return new Date(date.setMonth(date.getMonth() + 1));
       case "quarterly":
-        return new Date(today.setMonth(today.getMonth() + 3));
+        return new Date(date.setMonth(date.getMonth() + 3));
       case "annual":
-        return new Date(today.setFullYear(today.getFullYear() + 1));
+        return new Date(date.setFullYear(date.getFullYear() + 1));
       default:
-        return new Date(today.setMonth(today.getMonth() + 1));
+        return new Date(date.setMonth(date.getMonth() + 1));
     }
   };
 
@@ -62,7 +63,7 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
     }
 
     try {
-      const nextBillingDate = calculateNextBillingDate(billingCycle);
+      const nextBillingDate = calculateNextBillingDate(activationDate, billingCycle);
       
       const { error } = await supabase.from("subscriptions").insert({
         user_id: session.user.id,
@@ -71,6 +72,7 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
         billing_cycle: billingCycle,
         category,
         website_url: url || null,
+        activation_date: activationDate,
         next_billing_date: nextBillingDate.toISOString().split('T')[0],
       });
 
@@ -88,6 +90,7 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
       setAmount("");
       setBillingCycle("monthly");
       setCategory("entertainment");
+      setActivationDate(new Date().toISOString().split('T')[0]);
     } catch (error) {
       console.error("Error adding subscription:", error);
       toast({
@@ -148,6 +151,19 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
                 min="0"
                 step="0.01"
                 placeholder="9.99"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="activation-date" className="text-right">
+                Activation Date
+              </Label>
+              <Input
+                id="activation-date"
+                value={activationDate}
+                onChange={(e) => setActivationDate(e.target.value)}
+                className="col-span-3"
+                type="date"
                 required
               />
             </div>

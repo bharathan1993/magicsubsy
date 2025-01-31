@@ -50,6 +50,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          activation_date: string
           amount: number
           billing_cycle: string
           category: string
@@ -62,6 +63,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          activation_date?: string
           amount: number
           billing_cycle: string
           category: string
@@ -74,6 +76,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          activation_date?: string
           amount?: number
           billing_cycle?: string
           category?: string
