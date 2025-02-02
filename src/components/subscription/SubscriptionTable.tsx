@@ -7,6 +7,17 @@ import { SubscriptionActions } from "./SubscriptionActions";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface Subscription {
   id: string;
@@ -41,13 +52,20 @@ export function SubscriptionTable({
   const { formatAmount } = useCurrency();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (id: string) => {
+    setSubscriptionToDelete(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!subscriptionToDelete) return;
+
     try {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', id);
+        .eq('id', subscriptionToDelete);
 
       if (error) throw error;
 
@@ -60,7 +78,7 @@ export function SubscriptionTable({
       });
 
       // Call the parent's onDelete callback
-      onDelete(id);
+      onDelete(subscriptionToDelete);
     } catch (error) {
       console.error('Error deleting subscription:', error);
       toast({
@@ -68,6 +86,8 @@ export function SubscriptionTable({
         description: "Failed to delete subscription. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setSubscriptionToDelete(null);
     }
   };
 
@@ -79,55 +99,74 @@ export function SubscriptionTable({
   });
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Billing Cycle</TableHead>
-          <TableHead>Next Billing</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {filteredSubscriptions.map((subscription) => (
-          <TableRow key={subscription.id}>
-            <TableCell className="font-medium">{subscription.name}</TableCell>
-            <TableCell>{formatAmount(subscription.amount)}</TableCell>
-            <TableCell className="capitalize">{subscription.billing_cycle}</TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                {new Date(subscription.next_billing_date).toLocaleDateString()}
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="secondary" className="capitalize">
-                {subscription.category}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline" className="capitalize">
-                {subscription.subscription_type}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <SubscriptionStatusBadge status={subscription.status} />
-            </TableCell>
-            <TableCell>
-              <SubscriptionActions
-                subscriptionId={subscription.id}
-                websiteUrl={subscription.website_url}
-                onEdit={() => onEdit(subscription)}
-                onDelete={handleDelete}
-              />
-            </TableCell>
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Billing Cycle</TableHead>
+            <TableHead>Next Billing</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {filteredSubscriptions.map((subscription) => (
+            <TableRow key={subscription.id}>
+              <TableCell className="font-medium">{subscription.name}</TableCell>
+              <TableCell>{formatAmount(subscription.amount)}</TableCell>
+              <TableCell className="capitalize">{subscription.billing_cycle}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  {new Date(subscription.next_billing_date).toLocaleDateString()}
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary" className="capitalize">
+                  {subscription.category}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" className="capitalize">
+                  {subscription.subscription_type}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <SubscriptionStatusBadge status={subscription.status} />
+              </TableCell>
+              <TableCell>
+                <SubscriptionActions
+                  subscriptionId={subscription.id}
+                  websiteUrl={subscription.website_url}
+                  onEdit={() => onEdit(subscription)}
+                  onDelete={handleDeleteClick}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <AlertDialog open={!!subscriptionToDelete} onOpenChange={(open) => !open && setSubscriptionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the subscription.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
