@@ -7,6 +7,8 @@ interface SubscriptionFiltersProps {
   onSearchChange: (value: string) => void;
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
+  selectedStatus: string;
+  onStatusChange: (value: string) => void;
 }
 
 export function SubscriptionFilters({
@@ -14,6 +16,8 @@ export function SubscriptionFilters({
   onSearchChange,
   selectedCategory,
   onCategoryChange,
+  selectedStatus,
+  onStatusChange,
 }: SubscriptionFiltersProps) {
   return (
     <div className="flex gap-4 mb-4">
@@ -37,6 +41,16 @@ export function SubscriptionFilters({
           <SelectItem value="utilities">Utilities</SelectItem>
           <SelectItem value="health">Health & Fitness</SelectItem>
           <SelectItem value="other">Other</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={selectedStatus} onValueChange={onStatusChange}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="All Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="Active">Active</SelectItem>
+          <SelectItem value="Expired">Expired</SelectItem>
         </SelectContent>
       </Select>
     </div>

@@ -37,7 +37,8 @@ export default function Subscriptions() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deleteSubscriptionId, setDeleteSubscriptionId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const { data: subscriptions = [], refetch } = useQuery({
     queryKey: ['subscriptions'],
@@ -111,7 +112,7 @@ export default function Subscriptions() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Active Subscriptions</CardTitle>
+            <CardTitle>All Subscriptions</CardTitle>
           </CardHeader>
           <CardContent>
             <SubscriptionFilters
@@ -119,6 +120,8 @@ export default function Subscriptions() {
               onSearchChange={setSearchQuery}
               selectedCategory={selectedCategory}
               onCategoryChange={setSelectedCategory}
+              selectedStatus={selectedStatus}
+              onStatusChange={setSelectedStatus}
             />
             <SubscriptionTable
               subscriptions={subscriptions}
@@ -126,6 +129,7 @@ export default function Subscriptions() {
               onDelete={setDeleteSubscriptionId}
               searchQuery={searchQuery}
               selectedCategory={selectedCategory}
+              selectedStatus={selectedStatus}
             />
           </CardContent>
         </Card>

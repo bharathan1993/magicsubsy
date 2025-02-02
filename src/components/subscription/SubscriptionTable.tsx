@@ -23,6 +23,7 @@ interface SubscriptionTableProps {
   onDelete: (id: string) => void;
   searchQuery: string;
   selectedCategory: string;
+  selectedStatus: string;
 }
 
 export function SubscriptionTable({ 
@@ -30,14 +31,16 @@ export function SubscriptionTable({
   onEdit, 
   onDelete,
   searchQuery,
-  selectedCategory 
+  selectedCategory,
+  selectedStatus
 }: SubscriptionTableProps) {
   const { formatAmount } = useCurrency();
 
   const filteredSubscriptions = subscriptions.filter(subscription => {
     const matchesSearch = subscription.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || subscription.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStatus = selectedStatus === "all" || subscription.status === selectedStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   return (
