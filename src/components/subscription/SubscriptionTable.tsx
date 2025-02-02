@@ -54,11 +54,11 @@ export function SubscriptionTable({
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
   const { session } = useAuth();
 
-  const handleDeleteClick = async (id: string) => {
-    if (!session?.user?.id) {
+  const handleDeleteClick = async () => {
+    if (!subscriptionToDelete || !session?.user?.id) {
       toast({
         title: "Error",
-        description: "You must be logged in to delete subscriptions",
+        description: "Unable to delete subscription. Please try again.",
         variant: "destructive",
       });
       return;
@@ -68,11 +68,12 @@ export function SubscriptionTable({
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', id)
+        .eq('id', subscriptionToDelete)
         .eq('user_id', session.user.id);
 
       if (error) throw error;
 
+      // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
 
       toast({
@@ -165,7 +166,7 @@ export function SubscriptionTable({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => subscriptionToDelete && handleDeleteClick(subscriptionToDelete)}
+              onClick={handleDeleteClick}
               className="bg-red-500 hover:bg-red-700"
             >
               Delete
