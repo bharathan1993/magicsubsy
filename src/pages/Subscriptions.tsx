@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar, ArrowUpRight, Pencil, Trash2 } from "lucide-react";
+import { CreditCard, Calendar, ArrowUpRight, Pencil, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useQuery } from "@tanstack/react-query";
 
 interface Subscription {
   id: string;
@@ -30,35 +31,29 @@ interface Subscription {
   website_url: string | null;
   activation_date: string;
   subscription_type: string;
+  status: string;
 }
 
 export default function Subscriptions() {
   const { formatAmount } = useCurrency();
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const { session } = useAuth();
   const { toast } = useToast();
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deleteSubscriptionId, setDeleteSubscriptionId] = useState<string | null>(null);
 
-  const fetchSubscriptions = async () => {
-    try {
+  const { data: subscriptions = [], refetch } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: async () => {
       const { data, error } = await supabase
-        .from("subscriptions")
+        .from("subscription_status")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSubscriptions(data || []);
-    } catch (error) {
-      console.error("Error fetching subscriptions:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load subscriptions. Please try again.",
-        variant: "destructive",
-      });
+      return data || [];
     }
-  };
+  });
 
   const handleDelete = async () => {
     if (!deleteSubscriptionId) return;
@@ -76,7 +71,7 @@ export default function Subscriptions() {
         description: "Subscription deleted successfully",
       });
 
-      fetchSubscriptions();
+      refetch();
     } catch (error) {
       console.error("Error deleting subscription:", error);
       toast({
@@ -89,10 +84,6 @@ export default function Subscriptions() {
     setDeleteSubscriptionId(null);
   };
 
-  useEffect(() => {
-    fetchSubscriptions();
-  }, [toast]);
-
   const handleEditClick = (subscription: Subscription) => {
     setEditingSubscription(subscription);
     setIsEditDialogOpen(true);
@@ -102,7 +93,7 @@ export default function Subscriptions() {
     setIsEditDialogOpen(open);
     if (!open) {
       setEditingSubscription(null);
-      fetchSubscriptions();
+      refetch();
     }
   };
 
@@ -140,6 +131,7 @@ export default function Subscriptions() {
                   <TableHead>Next Billing</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -164,6 +156,21 @@ export default function Subscriptions() {
                       <Badge variant="outline" className="capitalize">
                         {subscription.subscription_type}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {subscription.status === 'Active' ? (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-500" />
+                        )}
+                        <Badge 
+                          variant={subscription.status === 'Active' ? "success" : "destructive"}
+                          className="capitalize"
+                        >
+                          {subscription.status}
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

@@ -122,10 +122,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      subscription_status: {
+        Row: {
+          activation_date: string | null
+          amount: number | null
+          billing_cycle: string | null
+          category: string | null
+          id: string | null
+          name: string | null
+          next_billing_date: string | null
+          status: string | null
+          subscription_type: string | null
+          user_id: string | null
+          website_url: string | null
+        }
+        Insert: {
+          activation_date?: string | null
+          amount?: number | null
+          billing_cycle?: string | null
+          category?: string | null
+          id?: string | null
+          name?: string | null
+          next_billing_date?: string | null
+          status?: never
+          subscription_type?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          activation_date?: string | null
+          amount?: number | null
+          billing_cycle?: string | null
+          category?: string | null
+          id?: string | null
+          name?: string | null
+          next_billing_date?: string | null
+          status?: never
+          subscription_type?: string | null
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      is_subscription_expired: {
+        Args: {
+          next_billing_date: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

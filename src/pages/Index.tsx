@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CreditCard, DollarSign, Bell, TrendingDown } from "lucide-react";
+import { CreditCard, DollarSign, Bell, TrendingDown, CalendarX } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
 import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
@@ -9,6 +9,7 @@ import { Welcome } from "@/components/onboarding/Welcome";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useQuery } from "@tanstack/react-query";
 
 interface Subscription {
   id: string;
@@ -16,14 +17,34 @@ interface Subscription {
   amount: number;
   billing_cycle: string;
   category: string;
+  status: string;
 }
 
 export default function Index() {
   const [showWelcome, setShowWelcome] = useState(false);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [totalMonthly, setTotalMonthly] = useState(0);
   const { session } = useAuth();
   const { formatAmount } = useCurrency();
+
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_status")
+        .select("*");
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const totalMonthly = subscriptions.reduce((acc, sub) => {
+    let monthlyAmount = sub.amount;
+    if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
+    if (sub.billing_cycle === "annual") monthlyAmount = sub.amount / 12;
+    return acc + monthlyAmount;
+  }, 0);
+
+  const expiredCount = subscriptions.filter(sub => sub.status === 'Expired').length;
 
   useEffect(() => {
     const checkWelcomeStatus = async () => {
@@ -47,36 +68,6 @@ export default function Index() {
 
     checkWelcomeStatus();
   }, [session?.user?.id]);
-
-  useEffect(() => {
-    const fetchSubscriptions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        setSubscriptions(data || []);
-
-        // Calculate total monthly spending
-        const monthly = data?.reduce((acc, sub) => {
-          let monthlyAmount = sub.amount;
-          // Convert amounts to monthly basis
-          if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
-          if (sub.billing_cycle === "annual") monthlyAmount = sub.amount / 12;
-          return acc + monthlyAmount;
-        }, 0) || 0;
-
-        setTotalMonthly(monthly);
-      } catch (error) {
-        console.error("Error fetching subscriptions:", error);
-      }
-    };
-
-    fetchSubscriptions();
-  }, []);
 
   const handleCloseWelcome = async () => {
     if (!session?.user?.id) return;
@@ -116,10 +107,10 @@ export default function Index() {
             isCurrency={true}
           />
           <StatsCard
-            title="Active Alerts"
-            value="0"
-            subtitle="No active alerts"
-            icon={<Bell className="h-6 w-6" />}
+            title="Expired Subscriptions"
+            value={expiredCount.toString()}
+            subtitle={expiredCount === 1 ? "subscription expired" : "subscriptions expired"}
+            icon={<CalendarX className="h-6 w-6 text-red-500" />}
           />
           <StatsCard
             title="Potential Savings"
