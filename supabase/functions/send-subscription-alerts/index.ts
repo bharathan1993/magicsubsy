@@ -29,35 +29,63 @@ serve(async (req) => {
       .gte('next_billing_date', new Date().toISOString())
       .lte('next_billing_date', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
 
-    if (subError) throw subError
+    if (subError) {
+      console.error('Error fetching subscriptions:', subError)
+      throw subError
+    }
+
+    console.log(`Found ${subscriptions?.length || 0} subscriptions to process`)
+
+    const emailsSent = []
 
     for (const sub of subscriptions) {
       const daysUntilBilling = Math.ceil(
         (new Date(sub.next_billing_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       )
 
+      console.log(`Processing subscription ${sub.name}, days until billing: ${daysUntilBilling}`)
+
       // Check if we should send an alert based on user preferences
       if (
         sub.alert_preferences.payment_reminder &&
         daysUntilBilling <= sub.alert_preferences.payment_reminder_days
       ) {
-        await resend.emails.send({
-          from: "Subscription Manager <onboarding@resend.dev>",
-          to: sub.profiles.email,
-          subject: `Upcoming Payment Reminder: ${sub.name}`,
-          html: `
-            <h1>Upcoming Subscription Payment</h1>
-            <p>Your subscription to ${sub.name} will be renewed in ${daysUntilBilling} days.</p>
-            <p>Amount: $${sub.amount}</p>
-            <p>Billing Date: ${new Date(sub.next_billing_date).toLocaleDateString()}</p>
-          `,
-        })
+        try {
+          const emailResponse = await resend.emails.send({
+            from: "Subscription Manager <onboarding@resend.dev>",
+            to: sub.profiles.email,
+            subject: `Payment Reminder: ${sub.name} subscription due in ${daysUntilBilling} days`,
+            html: `
+              <h1>Upcoming Subscription Payment Reminder</h1>
+              <p>Your subscription to ${sub.name} will be renewed in ${daysUntilBilling} days.</p>
+              <p>Amount: $${sub.amount}</p>
+              <p>Billing Date: ${new Date(sub.next_billing_date).toLocaleDateString()}</p>
+              <p>This is an automated reminder based on your alert preferences.</p>
+            `,
+          })
 
-        console.log(`Sent payment reminder for ${sub.name} to ${sub.profiles.email}`)
+          console.log(`Sent payment reminder for ${sub.name} to ${sub.profiles.email}`, emailResponse)
+          emailsSent.push({
+            subscription: sub.name,
+            email: sub.profiles.email,
+            status: 'sent'
+          })
+        } catch (emailError) {
+          console.error(`Error sending email for ${sub.name}:`, emailError)
+          emailsSent.push({
+            subscription: sub.name,
+            email: sub.profiles.email,
+            status: 'failed',
+            error: emailError.message
+          })
+        }
       }
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true,
+      emailsSent
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
