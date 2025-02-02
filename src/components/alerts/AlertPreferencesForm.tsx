@@ -13,7 +13,13 @@ import { useAuth } from "@/contexts/AuthContext";
 export const AlertPreferencesForm = () => {
   const { toast } = useToast();
   const { session } = useAuth();
-  const [localPreferences, setLocalPreferences] = useState<any>(null);
+  const [localPreferences, setLocalPreferences] = useState({
+    payment_reminder: true,
+    payment_reminder_days: 3,
+    trial_ending: true,
+    auto_renewal: true,
+    subscription_expiry: true,
+  });
 
   const { data: preferences, refetch } = useQuery({
     queryKey: ['alert-preferences'],
@@ -82,16 +88,12 @@ export const AlertPreferencesForm = () => {
   };
 
   const handleToggleChange = (field: string, value: boolean) => {
-    if (!localPreferences) return;
-    setLocalPreferences({ ...localPreferences, [field]: value });
+    setLocalPreferences(prev => ({ ...prev, [field]: value }));
   };
 
   const handleDaysChange = (days: number) => {
-    if (!localPreferences) return;
-    setLocalPreferences({ ...localPreferences, payment_reminder_days: days });
+    setLocalPreferences(prev => ({ ...prev, payment_reminder_days: days }));
   };
-
-  if (!localPreferences) return null;
 
   return (
     <Card>
