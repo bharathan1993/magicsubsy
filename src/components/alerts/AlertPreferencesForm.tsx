@@ -19,8 +19,8 @@ export const AlertPreferencesForm = () => {
     subscription_expiry: true,
   });
 
-  const { data: preferences, refetch } = useQuery({
-    queryKey: ['alert-preferences'],
+  const { data: preferences, isLoading } = useQuery({
+    queryKey: ['alert-preferences', session?.user.id],
     queryFn: async () => {
       if (!session?.user.id) return null;
       
@@ -34,11 +34,20 @@ export const AlertPreferencesForm = () => {
       return data;
     },
     enabled: !!session?.user.id,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 
+  // Update local state when preferences are loaded
   useEffect(() => {
     if (preferences) {
-      setLocalPreferences(preferences);
+      setLocalPreferences({
+        payment_reminder: preferences.payment_reminder ?? true,
+        payment_reminder_days: preferences.payment_reminder_days ?? 3,
+        trial_ending: preferences.trial_ending ?? true,
+        auto_renewal: preferences.auto_renewal ?? true,
+        subscription_expiry: preferences.subscription_expiry ?? true,
+      });
     }
   }, [preferences]);
 
@@ -60,7 +69,6 @@ export const AlertPreferencesForm = () => {
         title: "Alert settings saved",
         description: "Your notification preferences have been updated.",
       });
-      refetch();
     },
     onError: (error) => {
       console.error('Error saving preferences:', error);
@@ -90,7 +98,8 @@ export const AlertPreferencesForm = () => {
           .upsert(defaultPreferences);
           
         if (!error) {
-          refetch();
+          // Refresh the query to get the latest data
+          queryClient.invalidateQueries({ queryKey: ['alert-preferences', session.user.id] });
         }
       }
     };
@@ -121,6 +130,19 @@ export const AlertPreferencesForm = () => {
   const handleDaysChange = (days: number) => {
     setLocalPreferences(prev => ({ ...prev, payment_reminder_days: days }));
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Alert Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          Loading preferences...
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
