@@ -165,8 +165,8 @@ export default function Subscriptions() {
                           <XCircle className="w-4 h-4 text-red-500" />
                         )}
                         <Badge 
-                          variant={subscription.status === 'Active' ? "success" : "destructive"}
-                          className="capitalize"
+                          variant={subscription.status === 'Active' ? "secondary" : "destructive"}
+                          className={`capitalize ${subscription.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''}`}
                         >
                           {subscription.status}
                         </Badge>
