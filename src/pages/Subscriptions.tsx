@@ -1,38 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { EditSubscriptionDialog } from "@/components/dashboard/EditSubscriptionDialog";
 import { SubscriptionStats } from "@/components/subscription/SubscriptionStats";
 import { SubscriptionTable } from "@/components/subscription/SubscriptionTable";
 import { SubscriptionFilters } from "@/components/subscription/SubscriptionFilters";
-
-interface Subscription {
-  id: string;
-  name: string;
-  amount: number;
-  billing_cycle: string;
-  next_billing_date: string;
-  category: string;
-  website_url: string | null;
-  activation_date: string;
-  subscription_type: string;
-  status: string;
-}
+import { Subscription } from "@/types/subscription";
 
 export default function Subscriptions() {
-  const { toast } = useToast();
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,13 +18,19 @@ export default function Subscriptions() {
   const { data: subscriptions = [], refetch } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: async () => {
+      console.log('Fetching subscriptions...');
       const { data, error } = await supabase
-        .from("subscriptions")  // Changed from subscription_status to subscriptions
+        .from("subscriptions")
         .select("*")
         .order('next_billing_date', { ascending: true });
 
-      if (error) throw error;
-      return data || [];
+      if (error) {
+        console.error('Error fetching subscriptions:', error);
+        throw error;
+      }
+      
+      console.log('Fetched subscriptions:', data);
+      return data as Subscription[];
     }
   });
 

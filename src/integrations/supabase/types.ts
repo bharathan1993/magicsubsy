@@ -94,6 +94,7 @@ export type Database = {
           id: string
           name: string
           next_billing_date: string
+          status: string
           subscription_type: string
           updated_at: string | null
           user_id: string
@@ -108,6 +109,7 @@ export type Database = {
           id?: string
           name: string
           next_billing_date: string
+          status?: string
           subscription_type?: string
           updated_at?: string | null
           user_id: string
@@ -122,6 +124,7 @@ export type Database = {
           id?: string
           name?: string
           next_billing_date?: string
+          status?: string
           subscription_type?: string
           updated_at?: string | null
           user_id?: string
