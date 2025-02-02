@@ -11,8 +11,8 @@ interface SubscriptionActionsProps {
 export function SubscriptionActions({ 
   subscriptionId, 
   websiteUrl, 
-  onEdit, 
-  onDelete 
+  onEdit,
+  onDelete
 }: SubscriptionActionsProps) {
   return (
     <div className="flex items-center gap-2">

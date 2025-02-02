@@ -35,7 +35,6 @@ export default function Subscriptions() {
   const { toast } = useToast();
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [deleteSubscriptionId, setDeleteSubscriptionId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -52,35 +51,6 @@ export default function Subscriptions() {
       return data || [];
     }
   });
-
-  const handleDelete = async () => {
-    if (!deleteSubscriptionId) return;
-
-    try {
-      const { error } = await supabase
-        .from("subscriptions")
-        .delete()
-        .eq("id", deleteSubscriptionId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Subscription deleted successfully",
-      });
-
-      refetch();
-    } catch (error) {
-      console.error("Error deleting subscription:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete subscription. Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    setDeleteSubscriptionId(null);
-  };
 
   const handleEditClick = (subscription: Subscription) => {
     setEditingSubscription(subscription);
@@ -126,7 +96,6 @@ export default function Subscriptions() {
             <SubscriptionTable
               subscriptions={subscriptions}
               onEdit={handleEditClick}
-              onDelete={setDeleteSubscriptionId}
               searchQuery={searchQuery}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
@@ -140,23 +109,6 @@ export default function Subscriptions() {
         onOpenChange={handleEditDialogClose}
         subscription={editingSubscription}
       />
-
-      <AlertDialog open={!!deleteSubscriptionId} onOpenChange={() => setDeleteSubscriptionId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the subscription.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
