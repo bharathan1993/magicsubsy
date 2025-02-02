@@ -65,13 +65,20 @@ export function SubscriptionTable({
     }
 
     try {
+      console.log('Attempting to delete subscription:', subscriptionToDelete);
+      
       const { error } = await supabase
         .from('subscriptions')
         .delete()
         .eq('id', subscriptionToDelete)
         .eq('user_id', session.user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+
+      console.log('Successfully deleted subscription');
 
       // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
