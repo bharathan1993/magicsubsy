@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CreditCard, DollarSign, Bell, TrendingDown, CalendarX } from "lucide-react";
+import { CreditCard, DollarSign, Bell, TrendingDown, CalendarX, CheckCircle } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
 import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
@@ -45,6 +45,7 @@ export default function Index() {
   }, 0);
 
   const expiredCount = subscriptions.filter(sub => sub.status === 'Expired').length;
+  const activeCount = subscriptions.filter(sub => sub.status === 'Active').length;
 
   useEffect(() => {
     const checkWelcomeStatus = async () => {
@@ -96,7 +97,7 @@ export default function Index() {
           <StatsCard
             title="Total Subscriptions"
             value={subscriptions.length.toString()}
-            subtitle={`${subscriptions.length} active subscriptions`}
+            subtitle={`${subscriptions.length} total subscriptions`}
             icon={<CreditCard className="h-6 w-6" />}
           />
           <StatsCard
@@ -107,17 +108,16 @@ export default function Index() {
             isCurrency={true}
           />
           <StatsCard
+            title="Active Subscriptions"
+            value={activeCount.toString()}
+            subtitle={activeCount === 1 ? "subscription active" : "subscriptions active"}
+            icon={<CheckCircle className="h-6 w-6 text-green-500" />}
+          />
+          <StatsCard
             title="Expired Subscriptions"
             value={expiredCount.toString()}
             subtitle={expiredCount === 1 ? "subscription expired" : "subscriptions expired"}
             icon={<CalendarX className="h-6 w-6 text-red-500" />}
-          />
-          <StatsCard
-            title="Potential Savings"
-            value={0}
-            subtitle="No savings identified yet"
-            icon={<TrendingDown className="h-6 w-6" />}
-            isCurrency={true}
           />
         </div>
 
