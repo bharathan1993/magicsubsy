@@ -32,15 +32,18 @@ export const AlertPreferencesForm = () => {
         .eq('user_id', session.user.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching preferences:', error);
+        throw error;
+      }
+      
       return data;
     },
     enabled: !!session?.user.id,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (formerly cacheTime)
+    staleTime: 30000,
+    gcTime: 1000 * 60 * 5,
   });
 
-  // Update local state when preferences are loaded
   useEffect(() => {
     if (preferences) {
       setLocalPreferences({
@@ -57,22 +60,27 @@ export const AlertPreferencesForm = () => {
     mutationFn: async (newPreferences: any) => {
       if (!session?.user.id) throw new Error("No user session");
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('alert_preferences')
         .upsert({
           user_id: session.user.id,
           ...newPreferences,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData(['alert-preferences', session?.user.id], data);
+      queryClient.invalidateQueries({ queryKey: ['alert-preferences', session?.user.id] });
       toast({
         title: "Alert settings saved",
         description: "Your notification preferences have been updated.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error saving preferences:', error);
       toast({
         title: "Error saving settings",
@@ -82,7 +90,6 @@ export const AlertPreferencesForm = () => {
     },
   });
 
-  // Initialize default preferences silently without showing toast
   useEffect(() => {
     const initializeDefaultPreferences = async () => {
       if (!preferences && session?.user.id) {
@@ -95,13 +102,18 @@ export const AlertPreferencesForm = () => {
           user_id: session.user.id
         };
         
-        const { error } = await supabase
-          .from('alert_preferences')
-          .upsert(defaultPreferences);
-          
-        if (!error) {
-          // Refresh the query to get the latest data
-          queryClient.invalidateQueries({ queryKey: ['alert-preferences', session.user.id] });
+        try {
+          const { error } = await supabase
+            .from('alert_preferences')
+            .upsert(defaultPreferences);
+            
+          if (!error) {
+            queryClient.invalidateQueries({ queryKey: ['alert-preferences', session.user.id] });
+          } else {
+            console.error('Error initializing preferences:', error);
+          }
+        } catch (err) {
+          console.error('Error in initialization:', err);
         }
       }
     };
