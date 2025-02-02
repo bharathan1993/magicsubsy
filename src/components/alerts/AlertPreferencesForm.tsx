@@ -22,15 +22,18 @@ export const AlertPreferencesForm = () => {
   const { data: preferences, refetch } = useQuery({
     queryKey: ['alert-preferences'],
     queryFn: async () => {
+      if (!session?.user.id) return null;
+      
       const { data, error } = await supabase
         .from('alert_preferences')
         .select('*')
-        .eq('user_id', session?.user.id)
+        .eq('user_id', session.user.id)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    enabled: !!session?.user.id,
   });
 
   useEffect(() => {
@@ -41,10 +44,12 @@ export const AlertPreferencesForm = () => {
 
   const updatePreferences = useMutation({
     mutationFn: async (newPreferences: any) => {
+      if (!session?.user.id) throw new Error("No user session");
+      
       const { error } = await supabase
         .from('alert_preferences')
         .upsert({
-          user_id: session?.user.id,
+          user_id: session.user.id,
           ...newPreferences,
         });
 
@@ -58,6 +63,7 @@ export const AlertPreferencesForm = () => {
       refetch();
     },
     onError: (error) => {
+      console.error('Error saving preferences:', error);
       toast({
         title: "Error saving settings",
         description: error.message,
@@ -79,12 +85,13 @@ export const AlertPreferencesForm = () => {
           user_id: session.user.id
         };
         
-        // Silent upsert without triggering toast
-        await supabase
+        const { error } = await supabase
           .from('alert_preferences')
           .upsert(defaultPreferences);
           
-        refetch();
+        if (!error) {
+          refetch();
+        }
       }
     };
 
@@ -92,8 +99,19 @@ export const AlertPreferencesForm = () => {
   }, [preferences, session?.user.id]);
 
   const handleSaveSettings = () => {
-    if (!localPreferences) return;
-    updatePreferences.mutate(localPreferences);
+    if (!session?.user.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save preferences",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    updatePreferences.mutate({
+      ...localPreferences,
+      user_id: session.user.id
+    });
   };
 
   const handleToggleChange = (field: string, value: boolean) => {
@@ -122,8 +140,12 @@ export const AlertPreferencesForm = () => {
           subscriptionExpiry={localPreferences.subscription_expiry}
           onToggleChange={handleToggleChange}
         />
-        <Button onClick={handleSaveSettings} className="w-full">
-          Save Alert Preferences
+        <Button 
+          onClick={handleSaveSettings} 
+          className="w-full"
+          disabled={updatePreferences.isPending}
+        >
+          {updatePreferences.isPending ? 'Saving...' : 'Save Alert Preferences'}
         </Button>
       </CardContent>
     </Card>
