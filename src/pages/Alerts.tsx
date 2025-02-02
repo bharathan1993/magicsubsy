@@ -48,9 +48,9 @@ export default function Alerts() {
         .from('alert_preferences')
         .select('*')
         .eq('user_id', session?.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       return data;
     },
   });
@@ -82,15 +82,18 @@ export default function Alerts() {
     },
   });
 
+  // Initialize preferences if they don't exist
   useEffect(() => {
     if (!preferences && session?.user.id) {
-      updatePreferences.mutate({
+      const defaultPreferences = {
         payment_reminder: true,
         payment_reminder_days: 3,
         trial_ending: true,
         auto_renewal: true,
         subscription_expiry: true,
-      });
+        user_id: session.user.id
+      };
+      updatePreferences.mutate(defaultPreferences);
     }
   }, [preferences, session?.user.id]);
 
