@@ -8,8 +8,12 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProps) {
-  const expiredCount = subscriptions.filter(sub => sub.status === 'Expired').length;
-  const activeCount = subscriptions.filter(sub => sub.status === 'Active').length;
+  // Filter subscriptions based on their status
+  const activeCount = subscriptions.filter(sub => sub.status === 'active').length;
+  const expiredCount = subscriptions.filter(sub => sub.status === 'expired').length;
+
+  console.log('Active subscriptions:', activeCount);
+  console.log('Expired subscriptions:', expiredCount);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
