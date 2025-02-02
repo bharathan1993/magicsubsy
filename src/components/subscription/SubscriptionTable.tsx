@@ -54,18 +54,12 @@ export function SubscriptionTable({
   const queryClient = useQueryClient();
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
 
-  const handleDeleteClick = (id: string) => {
-    setSubscriptionToDelete(id);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!subscriptionToDelete) return;
-
+  const handleDeleteClick = async (id: string) => {
     try {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', subscriptionToDelete);
+        .eq('id', id);
 
       if (error) throw error;
 
@@ -78,7 +72,7 @@ export function SubscriptionTable({
       });
 
       // Call the parent's onDelete callback
-      onDelete(subscriptionToDelete);
+      onDelete(id);
     } catch (error) {
       console.error('Error deleting subscription:', error);
       toast({
@@ -143,7 +137,7 @@ export function SubscriptionTable({
                   subscriptionId={subscription.id}
                   websiteUrl={subscription.website_url}
                   onEdit={() => onEdit(subscription)}
-                  onDelete={handleDeleteClick}
+                  onDelete={setSubscriptionToDelete}
                 />
               </TableCell>
             </TableRow>
@@ -151,7 +145,10 @@ export function SubscriptionTable({
         </TableBody>
       </Table>
 
-      <AlertDialog open={!!subscriptionToDelete} onOpenChange={(open) => !open && setSubscriptionToDelete(null)}>
+      <AlertDialog 
+        open={!!subscriptionToDelete} 
+        onOpenChange={(open) => !open && setSubscriptionToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -161,7 +158,10 @@ export function SubscriptionTable({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-500 hover:bg-red-700">
+            <AlertDialogAction 
+              onClick={() => subscriptionToDelete && handleDeleteClick(subscriptionToDelete)}
+              className="bg-red-500 hover:bg-red-700"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
