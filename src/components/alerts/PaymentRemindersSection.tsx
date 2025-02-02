@@ -31,12 +31,13 @@ export const PaymentRemindersSection = ({
             onCheckedChange={(checked) => onToggleChange('payment_reminder', checked)}
           />
         </div>
-        <div className="space-y-2">
+        <div className={`space-y-2 ${!paymentReminder ? 'opacity-50 pointer-events-none' : ''}`}>
           <Label>Remind me before payment</Label>
           <RadioGroup
             value={paymentReminderDays?.toString()}
             onValueChange={(value) => onDaysChange(parseInt(value))}
             className="flex flex-col space-y-2"
+            disabled={!paymentReminder}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="7" id="r1" />
