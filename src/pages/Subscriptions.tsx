@@ -43,7 +43,7 @@ export default function Subscriptions() {
     queryKey: ['subscriptions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("subscription_status")
+        .from("subscriptions")  // Changed from subscription_status to subscriptions
         .select("*")
         .order('next_billing_date', { ascending: true });
 
