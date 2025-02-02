@@ -1,125 +1,22 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { PaymentRemindersSection } from "./PaymentRemindersSection";
 import { SubscriptionStatusSection } from "./SubscriptionStatusSection";
+import { AlertPreferencesLoading } from "./AlertPreferencesLoading";
+import { useAlertPreferences } from "@/hooks/useAlertPreferences";
 
 export const AlertPreferencesForm = () => {
   const { toast } = useToast();
   const { session } = useAuth();
-  const queryClient = useQueryClient();
-  
-  const [localPreferences, setLocalPreferences] = useState({
-    payment_reminder: true,
-    payment_reminder_days: 3,
-    trial_ending: true,
-    auto_renewal: true,
-    subscription_expiry: true,
-  });
-
-  const { data: preferences, isLoading } = useQuery({
-    queryKey: ['alert-preferences', session?.user.id],
-    queryFn: async () => {
-      if (!session?.user.id) return null;
-      
-      const { data, error } = await supabase
-        .from('alert_preferences')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching preferences:', error);
-        throw error;
-      }
-      
-      return data;
-    },
-    enabled: !!session?.user.id,
-    staleTime: 30000,
-    gcTime: 1000 * 60 * 5,
-  });
-
-  useEffect(() => {
-    if (preferences) {
-      setLocalPreferences({
-        payment_reminder: preferences.payment_reminder ?? true,
-        payment_reminder_days: preferences.payment_reminder_days ?? 3,
-        trial_ending: preferences.trial_ending ?? true,
-        auto_renewal: preferences.auto_renewal ?? true,
-        subscription_expiry: preferences.subscription_expiry ?? true,
-      });
-    }
-  }, [preferences]);
-
-  const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: any) => {
-      if (!session?.user.id) throw new Error("No user session");
-      
-      const { data, error } = await supabase
-        .from('alert_preferences')
-        .upsert({
-          user_id: session.user.id,
-          ...newPreferences,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(['alert-preferences', session?.user.id], data);
-      queryClient.invalidateQueries({ queryKey: ['alert-preferences', session?.user.id] });
-      toast({
-        title: "Alert settings saved",
-        description: "Your notification preferences have been updated.",
-      });
-    },
-    onError: (error: Error) => {
-      console.error('Error saving preferences:', error);
-      toast({
-        title: "Error saving settings",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  useEffect(() => {
-    const initializeDefaultPreferences = async () => {
-      if (!preferences && session?.user.id) {
-        const defaultPreferences = {
-          payment_reminder: true,
-          payment_reminder_days: 3,
-          trial_ending: true,
-          auto_renewal: true,
-          subscription_expiry: true,
-          user_id: session.user.id
-        };
-        
-        try {
-          const { error } = await supabase
-            .from('alert_preferences')
-            .upsert(defaultPreferences);
-            
-          if (!error) {
-            queryClient.invalidateQueries({ queryKey: ['alert-preferences', session.user.id] });
-          } else {
-            console.error('Error initializing preferences:', error);
-          }
-        } catch (err) {
-          console.error('Error in initialization:', err);
-        }
-      }
-    };
-
-    initializeDefaultPreferences();
-  }, [preferences, session?.user.id, queryClient]);
+  const { 
+    preferences, 
+    setPreferences, 
+    isLoading, 
+    savePreferences,
+    isSaving 
+  } = useAlertPreferences();
 
   const handleSaveSettings = () => {
     if (!session?.user.id) {
@@ -131,31 +28,19 @@ export const AlertPreferencesForm = () => {
       return;
     }
     
-    updatePreferences.mutate({
-      ...localPreferences,
-      user_id: session.user.id
-    });
+    savePreferences(preferences);
   };
 
   const handleToggleChange = (field: string, value: boolean) => {
-    setLocalPreferences(prev => ({ ...prev, [field]: value }));
+    setPreferences(prev => ({ ...prev, [field]: value }));
   };
 
   const handleDaysChange = (days: number) => {
-    setLocalPreferences(prev => ({ ...prev, payment_reminder_days: days }));
+    setPreferences(prev => ({ ...prev, payment_reminder_days: days }));
   };
 
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Alert Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          Loading preferences...
-        </CardContent>
-      </Card>
-    );
+    return <AlertPreferencesLoading />;
   }
 
   return (
@@ -165,23 +50,23 @@ export const AlertPreferencesForm = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <PaymentRemindersSection
-          paymentReminder={localPreferences.payment_reminder}
-          paymentReminderDays={localPreferences.payment_reminder_days}
+          paymentReminder={preferences.payment_reminder}
+          paymentReminderDays={preferences.payment_reminder_days}
           onToggleChange={handleToggleChange}
           onDaysChange={handleDaysChange}
         />
         <SubscriptionStatusSection
-          trialEnding={localPreferences.trial_ending}
-          autoRenewal={localPreferences.auto_renewal}
-          subscriptionExpiry={localPreferences.subscription_expiry}
+          trialEnding={preferences.trial_ending}
+          autoRenewal={preferences.auto_renewal}
+          subscriptionExpiry={preferences.subscription_expiry}
           onToggleChange={handleToggleChange}
         />
         <Button 
           onClick={handleSaveSettings} 
           className="w-full"
-          disabled={updatePreferences.isPending}
+          disabled={isSaving}
         >
-          {updatePreferences.isPending ? 'Saving...' : 'Save Alert Preferences'}
+          {isSaving ? 'Saving...' : 'Save Alert Preferences'}
         </Button>
       </CardContent>
     </Card>
