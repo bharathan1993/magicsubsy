@@ -4,6 +4,9 @@ import { Calendar } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { SubscriptionActions } from "./SubscriptionActions";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Subscription {
   id: string;
@@ -36,6 +39,37 @@ export function SubscriptionTable({
   selectedStatus
 }: SubscriptionTableProps) {
   const { formatAmount } = useCurrency();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Invalidate and refetch subscriptions query
+      await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+
+      toast({
+        title: "Success",
+        description: "Subscription deleted successfully",
+      });
+
+      // Call the parent's onDelete callback
+      onDelete(id);
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subscription. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const filteredSubscriptions = subscriptions.filter(subscription => {
     const matchesSearch = subscription.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -88,7 +122,7 @@ export function SubscriptionTable({
                 subscriptionId={subscription.id}
                 websiteUrl={subscription.website_url}
                 onEdit={() => onEdit(subscription)}
-                onDelete={onDelete}
+                onDelete={handleDelete}
               />
             </TableCell>
           </TableRow>
