@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, Calendar } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export const AlertPreferencesForm = () => {
   const { toast } = useToast();
   const { session } = useAuth();
+  const [localPreferences, setLocalPreferences] = useState<any>(null);
 
   const { data: preferences, refetch } = useQuery({
     queryKey: ['alert-preferences'],
@@ -27,6 +28,12 @@ export const AlertPreferencesForm = () => {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (preferences) {
+      setLocalPreferences(preferences);
+    }
+  }, [preferences]);
 
   const updatePreferences = useMutation({
     mutationFn: async (newPreferences: any) => {
@@ -70,19 +77,21 @@ export const AlertPreferencesForm = () => {
   }, [preferences, session?.user.id]);
 
   const handleSaveSettings = () => {
-    if (!preferences) return;
-    updatePreferences.mutate(preferences);
+    if (!localPreferences) return;
+    updatePreferences.mutate(localPreferences);
   };
 
   const handleToggleChange = (field: string, value: boolean) => {
-    if (!preferences) return;
-    updatePreferences.mutate({ ...preferences, [field]: value });
+    if (!localPreferences) return;
+    setLocalPreferences({ ...localPreferences, [field]: value });
   };
 
   const handleDaysChange = (days: number) => {
-    if (!preferences) return;
-    updatePreferences.mutate({ ...preferences, payment_reminder_days: days });
+    if (!localPreferences) return;
+    setLocalPreferences({ ...localPreferences, payment_reminder_days: days });
   };
+
+  if (!localPreferences) return null;
 
   return (
     <Card>
@@ -101,14 +110,14 @@ export const AlertPreferencesForm = () => {
               <Label htmlFor="payment-reminder">Upcoming payment notifications</Label>
               <Switch
                 id="payment-reminder"
-                checked={preferences?.payment_reminder}
+                checked={localPreferences.payment_reminder}
                 onCheckedChange={(checked) => handleToggleChange('payment_reminder', checked)}
               />
             </div>
             <div className="space-y-2">
               <Label>Remind me before payment</Label>
               <RadioGroup
-                value={preferences?.payment_reminder_days?.toString()}
+                value={localPreferences.payment_reminder_days?.toString()}
                 onValueChange={(value) => handleDaysChange(parseInt(value))}
                 className="flex flex-col space-y-2"
               >
@@ -140,7 +149,7 @@ export const AlertPreferencesForm = () => {
               <Label htmlFor="trial-ending">Trial period ending</Label>
               <Switch
                 id="trial-ending"
-                checked={preferences?.trial_ending}
+                checked={localPreferences.trial_ending}
                 onCheckedChange={(checked) => handleToggleChange('trial_ending', checked)}
               />
             </div>
@@ -148,7 +157,7 @@ export const AlertPreferencesForm = () => {
               <Label htmlFor="auto-renewal">Auto-renewal reminders</Label>
               <Switch
                 id="auto-renewal"
-                checked={preferences?.auto_renewal}
+                checked={localPreferences.auto_renewal}
                 onCheckedChange={(checked) => handleToggleChange('auto_renewal', checked)}
               />
             </div>
@@ -156,7 +165,7 @@ export const AlertPreferencesForm = () => {
               <Label htmlFor="subscription-expiry">Subscription expiry</Label>
               <Switch
                 id="subscription-expiry"
-                checked={preferences?.subscription_expiry}
+                checked={localPreferences.subscription_expiry}
                 onCheckedChange={(checked) => handleToggleChange('subscription_expiry', checked)}
               />
             </div>
