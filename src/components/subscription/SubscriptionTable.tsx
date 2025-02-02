@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Subscription {
   id: string;
@@ -53,13 +54,24 @@ export function SubscriptionTable({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
+  const { session } = useAuth();
 
   const handleDeleteClick = async (id: string) => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to delete subscriptions",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('subscriptions')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', session.user.id);
 
       if (error) throw error;
 
@@ -73,6 +85,9 @@ export function SubscriptionTable({
 
       // Call the parent's onDelete callback
       onDelete(id);
+      
+      // Clear the subscription to delete
+      setSubscriptionToDelete(null);
     } catch (error) {
       console.error('Error deleting subscription:', error);
       toast({
@@ -80,8 +95,6 @@ export function SubscriptionTable({
         description: "Failed to delete subscription. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setSubscriptionToDelete(null);
     }
   };
 
