@@ -68,18 +68,29 @@ export const AlertPreferencesForm = () => {
     },
   });
 
+  // Initialize default preferences silently without showing toast
   useEffect(() => {
-    if (!preferences && session?.user.id) {
-      const defaultPreferences = {
-        payment_reminder: true,
-        payment_reminder_days: 3,
-        trial_ending: true,
-        auto_renewal: true,
-        subscription_expiry: true,
-        user_id: session.user.id
-      };
-      updatePreferences.mutate(defaultPreferences);
-    }
+    const initializeDefaultPreferences = async () => {
+      if (!preferences && session?.user.id) {
+        const defaultPreferences = {
+          payment_reminder: true,
+          payment_reminder_days: 3,
+          trial_ending: true,
+          auto_renewal: true,
+          subscription_expiry: true,
+          user_id: session.user.id
+        };
+        
+        // Silent upsert without triggering toast
+        await supabase
+          .from('alert_preferences')
+          .upsert(defaultPreferences);
+          
+        refetch();
+      }
+    };
+
+    initializeDefaultPreferences();
   }, [preferences, session?.user.id]);
 
   const handleSaveSettings = () => {
