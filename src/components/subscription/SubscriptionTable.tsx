@@ -36,7 +36,6 @@ interface Subscription {
 interface SubscriptionTableProps {
   subscriptions: Subscription[];
   onEdit: (subscription: Subscription) => void;
-  onDelete: (id: string) => void;
   searchQuery: string;
   selectedCategory: string;
   selectedStatus: string;
@@ -44,8 +43,7 @@ interface SubscriptionTableProps {
 
 export function SubscriptionTable({ 
   subscriptions, 
-  onEdit, 
-  onDelete,
+  onEdit,
   searchQuery,
   selectedCategory,
   selectedStatus
@@ -75,18 +73,13 @@ export function SubscriptionTable({
 
       if (error) throw error;
 
-      // Invalidate and refetch subscriptions query
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
 
       toast({
         title: "Success",
         description: "Subscription deleted successfully",
       });
-
-      // Call the parent's onDelete callback
-      onDelete(id);
       
-      // Clear the subscription to delete
       setSubscriptionToDelete(null);
     } catch (error) {
       console.error('Error deleting subscription:', error);
