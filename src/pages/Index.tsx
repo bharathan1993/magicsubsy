@@ -6,18 +6,33 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { WelcomeHandler } from "@/components/dashboard/WelcomeHandler";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Index() {
+  const { session } = useAuth();
+  const userId = session?.user?.id;
+
   const { data: subscriptions = [] } = useQuery({
-    queryKey: ['subscriptions'],
+    queryKey: ['subscriptions', userId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("subscription_status")
-        .select("*");
+      console.log('Fetching subscriptions...');
+      if (!userId) return [];
       
-      if (error) throw error;
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq('user_id', userId)
+        .order('next_billing_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching subscriptions:', error);
+        throw error;
+      }
+      
+      console.log('Fetched subscriptions:', data);
       return data || [];
-    }
+    },
+    enabled: !!userId // Only run query when userId is available
   });
 
   const totalMonthly = subscriptions.reduce((acc, sub) => {
