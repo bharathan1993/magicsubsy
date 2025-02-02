@@ -27,7 +27,7 @@ export function SubscriptionActions({
 }: SubscriptionActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     onDelete(subscriptionId);
     setShowDeleteDialog(false);
   };
