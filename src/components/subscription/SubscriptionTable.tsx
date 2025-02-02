@@ -1,8 +1,9 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Pencil, Trash2, ArrowUpRight, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
+import { SubscriptionActions } from "./SubscriptionActions";
 
 interface Subscription {
   id: string;
@@ -80,50 +81,15 @@ export function SubscriptionTable({
               </Badge>
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-2">
-                {subscription.status === 'Active' ? (
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-red-500" />
-                )}
-                <Badge 
-                  variant={subscription.status === 'Active' ? "secondary" : "destructive"}
-                  className={subscription.status === 'Active' ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''}
-                >
-                  {subscription.status}
-                </Badge>
-              </div>
+              <SubscriptionStatusBadge status={subscription.status} />
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(subscription)}
-                  className="h-8 w-8"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(subscription.id)}
-                  className="h-8 w-8 text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                {subscription.website_url && (
-                  <a
-                    href={subscription.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Visit
-                    <ArrowUpRight className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
+              <SubscriptionActions
+                subscriptionId={subscription.id}
+                websiteUrl={subscription.website_url}
+                onEdit={() => onEdit(subscription)}
+                onDelete={onDelete}
+              />
             </TableCell>
           </TableRow>
         ))}
