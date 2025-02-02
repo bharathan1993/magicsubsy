@@ -31,7 +31,7 @@ export function SubscriptionFilters({
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Categories</SelectItem>
+          <SelectItem value="all">All Categories</SelectItem>
           <SelectItem value="entertainment">Entertainment</SelectItem>
           <SelectItem value="productivity">Productivity</SelectItem>
           <SelectItem value="utilities">Utilities</SelectItem>

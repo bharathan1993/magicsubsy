@@ -36,7 +36,7 @@ export function SubscriptionTable({
 
   const filteredSubscriptions = subscriptions.filter(subscription => {
     const matchesSearch = subscription.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "" || subscription.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || subscription.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
