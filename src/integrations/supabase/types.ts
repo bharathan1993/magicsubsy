@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alert_preferences: {
+        Row: {
+          auto_renewal: boolean | null
+          created_at: string | null
+          id: string
+          payment_reminder: boolean | null
+          payment_reminder_days: number | null
+          subscription_expiry: boolean | null
+          trial_ending: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renewal?: boolean | null
+          created_at?: string | null
+          id?: string
+          payment_reminder?: boolean | null
+          payment_reminder_days?: number | null
+          subscription_expiry?: boolean | null
+          trial_ending?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renewal?: boolean | null
+          created_at?: string | null
+          id?: string
+          payment_reminder?: boolean | null
+          payment_reminder_days?: number | null
+          subscription_expiry?: boolean | null
+          trial_ending?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -166,6 +202,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_subscription_alerts: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       is_subscription_expired: {
         Args: {
           next_billing_date: string
