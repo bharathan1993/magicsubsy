@@ -143,7 +143,7 @@ export function SubscriptionTable({
                   subscriptionId={subscription.id}
                   websiteUrl={subscription.website_url}
                   onEdit={() => onEdit(subscription)}
-                  onDelete={setSubscriptionToDelete}
+                  onDelete={() => setSubscriptionToDelete(subscription.id)}
                 />
               </TableCell>
             </TableRow>
