@@ -7,10 +7,14 @@ import { SubscriptionStats } from "@/components/subscription/SubscriptionStats";
 import { SubscriptionTable } from "@/components/subscription/SubscriptionTable";
 import { SubscriptionFilters } from "@/components/subscription/SubscriptionFilters";
 import { Subscription } from "@/types/subscription";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { NewSubscriptionDialog } from "@/components/dashboard/NewSubscriptionDialog";
 
 export default function Subscriptions() {
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -47,6 +51,13 @@ export default function Subscriptions() {
     }
   };
 
+  const handleNewDialogClose = (open: boolean) => {
+    setIsNewDialogOpen(open);
+    if (!open) {
+      refetch();
+    }
+  };
+
   const totalMonthly = subscriptions.reduce((acc, sub) => {
     let monthlyAmount = sub.amount;
     if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
@@ -59,7 +70,13 @@ export default function Subscriptions() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Your Subscriptions</h1>
-          <SubscriptionStats totalMonthly={totalMonthly} />
+          <div className="flex items-center gap-4">
+            <SubscriptionStats totalMonthly={totalMonthly} />
+            <Button onClick={() => setIsNewDialogOpen(true)} className="bg-green-500 hover:bg-green-600">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Add New Subscription
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -90,6 +107,11 @@ export default function Subscriptions() {
         open={isEditDialogOpen}
         onOpenChange={handleEditDialogClose}
         subscription={editingSubscription}
+      />
+
+      <NewSubscriptionDialog
+        open={isNewDialogOpen}
+        onOpenChange={handleNewDialogClose}
       />
     </div>
   );
