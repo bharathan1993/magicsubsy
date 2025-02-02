@@ -8,7 +8,7 @@ export function useCategories() {
     queryFn: async () => {
       const { data: subscriptions, error } = await supabase
         .from('subscriptions')
-        .select('category, amount');
+        .select('category, amount, billing_cycle');
       
       if (error) throw error;
 
@@ -16,20 +16,25 @@ export function useCategories() {
         return [];
       }
 
-      // Calculate category totals and percentages
+      // Calculate category totals and percentages with billing cycle adjustments
       const categoryTotals: Record<string, number> = {};
-      let totalAmount = 0;
+      let totalMonthlyAmount = 0;
 
       subscriptions.forEach((sub) => {
-        categoryTotals[sub.category] = (categoryTotals[sub.category] || 0) + Number(sub.amount);
-        totalAmount += Number(sub.amount);
+        // Convert amount to monthly based on billing cycle
+        let monthlyAmount = sub.amount;
+        if (sub.billing_cycle === 'quarterly') monthlyAmount = sub.amount / 3;
+        if (sub.billing_cycle === 'annual') monthlyAmount = sub.amount / 12;
+
+        categoryTotals[sub.category] = (categoryTotals[sub.category] || 0) + monthlyAmount;
+        totalMonthlyAmount += monthlyAmount;
       });
 
       // Convert to required format
       const categoryData: CategorySummary[] = Object.entries(categoryTotals).map(([category, amount]) => ({
         name: category,
         amount: amount,
-        percentage: Math.round((amount / totalAmount) * 100),
+        percentage: Math.round((amount / totalMonthlyAmount) * 100),
         trend: "stable", // You could implement trend calculation based on historical data
         description: `${category} subscriptions and services`
       }));
