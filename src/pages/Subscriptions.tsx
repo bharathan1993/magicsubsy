@@ -48,7 +48,7 @@ export default function Subscriptions() {
       const { data, error } = await supabase
         .from("subscription_status")
         .select("*")
-        .order('created_at', { ascending: false });
+        .order('next_billing_date', { ascending: true });
 
       if (error) throw error;
       return data || [];
