@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { PaymentRemindersSection } from "./PaymentRemindersSection";
 import { SubscriptionStatusSection } from "./SubscriptionStatusSection";
@@ -11,6 +11,8 @@ import { SubscriptionStatusSection } from "./SubscriptionStatusSection";
 export const AlertPreferencesForm = () => {
   const { toast } = useToast();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
+  
   const [localPreferences, setLocalPreferences] = useState({
     payment_reminder: true,
     payment_reminder_days: 3,
@@ -35,7 +37,7 @@ export const AlertPreferencesForm = () => {
     },
     enabled: !!session?.user.id,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (formerly cacheTime)
   });
 
   // Update local state when preferences are loaded
@@ -105,7 +107,7 @@ export const AlertPreferencesForm = () => {
     };
 
     initializeDefaultPreferences();
-  }, [preferences, session?.user.id]);
+  }, [preferences, session?.user.id, queryClient]);
 
   const handleSaveSettings = () => {
     if (!session?.user.id) {
