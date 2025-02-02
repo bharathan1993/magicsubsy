@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type AlertPreferences = {
-  payment_reminder: boolean;
-  payment_reminder_days: number;
-  trial_ending: boolean;
-  auto_renewal: boolean;
-  subscription_expiry: boolean;
-};
-
-const defaultPreferences: AlertPreferences = {
+const defaultPreferences = {
   payment_reminder: true,
   payment_reminder_days: 3,
   trial_ending: true,
@@ -21,20 +13,18 @@ const defaultPreferences: AlertPreferences = {
 };
 
 export const useAlertPreferences = () => {
-  const { toast } = useToast();
   const { session } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [localPreferences, setLocalPreferences] = useState<AlertPreferences>(defaultPreferences);
+  const [localPreferences, setLocalPreferences] = useState(defaultPreferences);
 
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['alert-preferences', session?.user.id],
     queryFn: async () => {
-      if (!session?.user.id) return null;
-      
       const { data, error } = await supabase
         .from('alert_preferences')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', session?.user.id)
         .maybeSingle();
 
       if (error) {
@@ -52,38 +42,29 @@ export const useAlertPreferences = () => {
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: AlertPreferences) => {
-      if (!session?.user.id) throw new Error("No user session");
-      
+    mutationFn: async (newPreferences: typeof defaultPreferences) => {
       const { data, error } = await supabase
         .from('alert_preferences')
         .upsert({
-          user_id: session.user.id,
           ...newPreferences,
+          user_id: session?.user.id,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
     },
     onMutate: async (newPreferences) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['alert-preferences', session?.user.id] });
-
-      // Snapshot the previous value
       const previousPreferences = queryClient.getQueryData(['alert-preferences', session?.user.id]);
-
-      // Optimistically update to the new value
       queryClient.setQueryData(['alert-preferences', session?.user.id], {
         ...newPreferences,
         user_id: session?.user.id,
       });
-
       return { previousPreferences };
     },
     onError: (error: Error, _, context) => {
-      // Rollback to the previous value on error
       if (context?.previousPreferences) {
         queryClient.setQueryData(['alert-preferences', session?.user.id], context.previousPreferences);
       }
@@ -92,6 +73,7 @@ export const useAlertPreferences = () => {
         title: "Error saving settings",
         description: error.message,
         variant: "destructive",
+        duration: 3000, // 3 seconds duration
       });
     },
     onSuccess: (data) => {
@@ -99,19 +81,16 @@ export const useAlertPreferences = () => {
       toast({
         title: "Alert settings saved",
         description: "Your notification preferences have been updated.",
+        duration: 3000, // 3 seconds duration
       });
     },
   });
 
   useEffect(() => {
     if (preferences) {
-      setLocalPreferences({
-        payment_reminder: preferences.payment_reminder ?? true,
-        payment_reminder_days: preferences.payment_reminder_days ?? 3,
-        trial_ending: preferences.trial_ending ?? true,
-        auto_renewal: preferences.auto_renewal ?? true,
-        subscription_expiry: preferences.subscription_expiry ?? true,
-      });
+      setLocalPreferences(preferences);
+    } else {
+      setLocalPreferences(defaultPreferences);
     }
   }, [preferences]);
 
@@ -134,7 +113,7 @@ export const useAlertPreferences = () => {
     preferences: localPreferences,
     setPreferences: setLocalPreferences,
     isLoading,
-    savePreferences: (prefs: AlertPreferences) => updatePreferences.mutate(prefs),
+    savePreferences: updatePreferences.mutate,
     isSaving: updatePreferences.isPending
   };
 };
