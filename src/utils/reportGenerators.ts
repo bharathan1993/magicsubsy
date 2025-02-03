@@ -5,7 +5,10 @@ const formatDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
 };
 
@@ -23,11 +26,13 @@ const convertToCSV = (data: any[]) => {
   
   const headers = Object.keys(data[0]);
   const rows = data.map(obj => 
-    headers.map(header => 
-      typeof obj[header] === 'string' && obj[header].includes(',') 
-        ? `"${obj[header]}"` 
-        : obj[header]
-    ).join(',')
+    headers.map(header => {
+      const value = obj[header];
+      if (value === null) return '';
+      return typeof value === 'string' && value.includes(',') 
+        ? `"${value}"` 
+        : value;
+    }).join(',')
   );
   
   return [headers.join(','), ...rows].join('\n');
@@ -147,4 +152,42 @@ export const generateUpcomingPayments = async () => {
 
   const csv = convertToCSV(upcomingData);
   downloadCSV(csv, `upcoming-payments-${new Date().toISOString().split('T')[0]}.csv`);
+};
+
+export const generateLoginHistoryReport = async () => {
+  const { data: loginHistory, error } = await supabase
+    .from('login_history')
+    .select('*')
+    .order('login_timestamp', { ascending: false });
+
+  if (error) throw error;
+
+  const reportData = loginHistory.map(log => ({
+    'Login Time': formatDate(new Date(log.login_timestamp)),
+    'IP Address': log.ip_address || 'Unknown',
+    'Device Info': log.device_info || 'Unknown'
+  }));
+
+  const csv = convertToCSV(reportData);
+  downloadCSV(csv, `login-history-${new Date().toISOString().split('T')[0]}.csv`);
+};
+
+export const generateAccountChangesReport = async () => {
+  const { data: auditLogs, error } = await supabase
+    .from('account_audit_logs')
+    .select('*')
+    .order('changed_at', { ascending: false });
+
+  if (error) throw error;
+
+  const reportData = auditLogs.map(log => ({
+    'Change Time': formatDate(new Date(log.changed_at)),
+    'Change Type': log.change_type,
+    'Changed Fields': JSON.stringify(log.changed_fields || {}),
+    'Previous Values': JSON.stringify(log.previous_values || {}),
+    'New Values': JSON.stringify(log.new_values || {})
+  }));
+
+  const csv = convertToCSV(reportData);
+  downloadCSV(csv, `account-changes-${new Date().toISOString().split('T')[0]}.csv`);
 };
