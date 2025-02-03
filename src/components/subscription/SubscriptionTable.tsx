@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Subscription {
@@ -53,6 +53,42 @@ export function SubscriptionTable({
   const queryClient = useQueryClient();
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
   const { session } = useAuth();
+
+  // Function to check if a subscription is expired
+  const isSubscriptionExpired = (nextBillingDate: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for date comparison
+    const billingDate = new Date(nextBillingDate);
+    return billingDate < today;
+  };
+
+  // Update subscription statuses based on next billing date
+  useEffect(() => {
+    const updateExpiredSubscriptions = async () => {
+      for (const subscription of subscriptions) {
+        const isExpired = isSubscriptionExpired(subscription.next_billing_date);
+        const newStatus = isExpired ? 'expired' : 'active';
+        
+        if (subscription.status !== newStatus) {
+          try {
+            const { error } = await supabase
+              .from('subscriptions')
+              .update({ status: newStatus })
+              .eq('id', subscription.id)
+              .eq('user_id', session?.user?.id);
+
+            if (error) throw error;
+          } catch (error) {
+            console.error('Error updating subscription status:', error);
+          }
+        }
+      }
+      // Refresh the subscriptions data
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+    };
+
+    updateExpiredSubscriptions();
+  }, [subscriptions, session?.user?.id, queryClient]);
 
   const handleDeleteClick = async () => {
     if (!subscriptionToDelete || !session?.user?.id) {
@@ -102,7 +138,7 @@ export function SubscriptionTable({
   const filteredSubscriptions = subscriptions.filter(subscription => {
     const matchesSearch = subscription.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || subscription.category === selectedCategory;
-    const matchesStatus = selectedStatus === "all" || subscription.status === selectedStatus;
+    const matchesStatus = selectedStatus === "all" || subscription.status.toLowerCase() === selectedStatus.toLowerCase();
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
