@@ -259,11 +259,12 @@ export default function Security() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-sm text-muted-foreground">No active sessions found</p>
-              )}
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No active sessions found</p>
+            )}
           </CardContent>
         </Card>
       </div>
