@@ -6,6 +6,7 @@ import { PaymentRemindersSection } from "./PaymentRemindersSection";
 import { SubscriptionStatusSection } from "./SubscriptionStatusSection";
 import { AlertPreferencesLoading } from "./AlertPreferencesLoading";
 import { useAlertPreferences } from "@/hooks/useAlertPreferences";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AlertPreferencesForm = () => {
   const { toast } = useToast();
@@ -39,6 +40,28 @@ export const AlertPreferencesForm = () => {
     setPreferences(prev => ({ ...prev, payment_reminder_days: days }));
   };
 
+  const handleTestEmail = async () => {
+    try {
+      const { error } = await supabase.functions.invoke('send-subscription-alerts', {
+        body: { test: true, email: session?.user.email }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test Email Sent",
+        description: "Please check your inbox for the test email",
+      });
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send test email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return <AlertPreferencesLoading />;
   }
@@ -61,13 +84,21 @@ export const AlertPreferencesForm = () => {
           subscriptionExpiry={preferences.subscription_expiry}
           onToggleChange={handleToggleChange}
         />
-        <Button 
-          onClick={handleSaveSettings} 
-          className="w-full"
-          disabled={isSaving}
-        >
-          {isSaving ? 'Saving...' : 'Save Alert Preferences'}
-        </Button>
+        <div className="flex gap-4">
+          <Button 
+            onClick={handleSaveSettings} 
+            className="flex-1"
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Alert Preferences'}
+          </Button>
+          <Button
+            onClick={handleTestEmail}
+            variant="outline"
+          >
+            Send Test Email
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

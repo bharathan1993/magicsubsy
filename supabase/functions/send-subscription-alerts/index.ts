@@ -18,6 +18,67 @@ serve(async (req) => {
   }
 
   try {
+    // Check if this is a test request
+    const { test, email } = await req.json().catch(() => ({ test: false, email: null }));
+    
+    if (test && email) {
+      console.log(`Sending test email to ${email}`);
+      
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('email', email)
+        .single();
+      
+      const userName = profile ? 
+        `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Valued Customer' 
+        : 'Valued Customer';
+
+      // Send test email
+      const emailResponse = await resend.emails.send({
+        from: "Subsy <notifications@subsy.app>",
+        to: email,
+        subject: `Test - Upcoming Payment Reminder for Your Netflix Subscription`,
+        html: `
+          <h1>Dear ${userName},</h1>
+          
+          <p>I hope this message finds you well.</p>
+          
+          <p>This is a friendly reminder that your subscription to Netflix is set to renew on ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}.</p>
+          
+          <p>To ensure uninterrupted access to services, please ensure that the payment of $9.99 is processed by the renewal date.</p>
+          
+          <p>For your convenience, you can manage your subscription and payment methods through your Subsy dashboard:</p>
+          <ul>
+            <li>View subscription details</li>
+            <li>Update payment methods</li>
+            <li>Manage alert preferences</li>
+          </ul>
+          
+          <p>If you have any questions or need assistance with the payment process, please don't hesitate to reach out to our support team at support@subsy.app.</p>
+          
+          <p>Thank you for choosing Subsy. We value your continued partnership and look forward to serving you in the upcoming term.</p>
+          
+          <p>Best regards,<br>
+          Bharathan<br>
+          Founder-Subsy</p>
+          
+          <p style="color: #666; font-size: 12px;">Note: This is a test email. You can modify your alert preferences in your Subsy dashboard.</p>
+        `,
+      });
+
+      console.log(`Test email sent:`, emailResponse);
+      
+      return new Response(JSON.stringify({ 
+        success: true,
+        message: 'Test email sent successfully'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
     // Get all subscriptions that need alerts
     const { data: subscriptions, error: subError } = await supabase
       .from('subscriptions')
