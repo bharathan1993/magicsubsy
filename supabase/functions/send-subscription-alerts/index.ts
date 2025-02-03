@@ -23,7 +23,7 @@ serve(async (req) => {
       .from('subscriptions')
       .select(`
         *,
-        profiles!inner(email),
+        profiles!inner(email, first_name, last_name),
         alert_preferences!inner(*)
       `)
       .gte('next_billing_date', new Date().toISOString())
@@ -50,17 +50,38 @@ serve(async (req) => {
         sub.alert_preferences.payment_reminder &&
         daysUntilBilling <= sub.alert_preferences.payment_reminder_days
       ) {
+        const userName = `${sub.profiles.first_name || ''} ${sub.profiles.last_name || ''}`.trim() || 'Valued Customer'
+        
         try {
           const emailResponse = await resend.emails.send({
-            from: "Subscription Manager <onboarding@resend.dev>",
+            from: "Subsy <notifications@subsy.app>",
             to: sub.profiles.email,
-            subject: `Payment Reminder: ${sub.name} subscription due in ${daysUntilBilling} days`,
+            subject: `Upcoming Payment Reminder for Your ${sub.name} Subscription`,
             html: `
-              <h1>Upcoming Subscription Payment Reminder</h1>
-              <p>Your subscription to ${sub.name} will be renewed in ${daysUntilBilling} days.</p>
-              <p>Amount: $${sub.amount}</p>
-              <p>Billing Date: ${new Date(sub.next_billing_date).toLocaleDateString()}</p>
-              <p>This is an automated reminder based on your alert preferences.</p>
+              <h1>Dear ${userName},</h1>
+              
+              <p>I hope this message finds you well.</p>
+              
+              <p>This is a friendly reminder that your subscription to ${sub.name} is set to renew on ${new Date(sub.next_billing_date).toLocaleDateString()}.</p>
+              
+              <p>To ensure uninterrupted access to services, please ensure that the payment of ${sub.amount} is processed by the renewal date.</p>
+              
+              <p>For your convenience, you can manage your subscription and payment methods through your Subsy dashboard:</p>
+              <ul>
+                <li>View subscription details</li>
+                <li>Update payment methods</li>
+                <li>Manage alert preferences</li>
+              </ul>
+              
+              <p>If you have any questions or need assistance with the payment process, please don't hesitate to reach out to our support team at support@subsy.app.</p>
+              
+              <p>Thank you for choosing Subsy. We value your continued partnership and look forward to serving you in the upcoming term.</p>
+              
+              <p>Best regards,<br>
+              Bharathan<br>
+              Founder-Subsy</p>
+              
+              <p style="color: #666; font-size: 12px;">Note: This is an automated reminder based on your alert preferences. You can modify these settings in your Subsy dashboard.</p>
             `,
           })
 
