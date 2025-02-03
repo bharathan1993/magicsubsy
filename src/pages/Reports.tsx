@@ -3,6 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Download,
   Receipt,
@@ -14,6 +24,8 @@ import {
   ArrowUpDown,
   Clock,
   Activity,
+  User,
+  History,
 } from "lucide-react";
 import {
   generateMonthlySpendingReport,
@@ -22,6 +34,7 @@ import {
   generatePlanChangeHistory,
   generateUpcomingPayments
 } from "@/utils/reportGenerators";
+import { format } from "date-fns";
 
 interface ReportType {
   id: string;
@@ -36,6 +49,36 @@ export default function Reports() {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("financial");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Fetch login history
+  const { data: loginHistory } = useQuery({
+    queryKey: ['loginHistory'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('login_history')
+        .select('*')
+        .order('login_timestamp', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch account audit logs
+  const { data: auditLogs } = useQuery({
+    queryKey: ['auditLogs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('account_audit_logs')
+        .select('*')
+        .order('changed_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleDownload = async (reportTitle: string, generator: () => Promise<void>) => {
     try {
@@ -108,15 +151,63 @@ export default function Reports() {
         id: "login-history",
         title: "Login & Access History",
         description: "Comprehensive log of login locations, devices, and IP addresses",
-        icon: <Shield className="h-5 w-5" />,
-        comingSoon: true,
+        icon: <History className="h-5 w-5" />,
+        content: (
+          <div className="mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Login Time</TableHead>
+                  <TableHead>IP Address</TableHead>
+                  <TableHead>Device Info</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loginHistory?.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell>
+                      {format(new Date(log.login_timestamp), 'PPpp')}
+                    </TableCell>
+                    <TableCell>{log.ip_address}</TableCell>
+                    <TableCell>{log.device_info}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ),
       },
       {
         id: "account-changes",
         title: "Account Changes Report",
         description: "Track all profile edits, password changes, and contact updates",
         icon: <Activity className="h-5 w-5" />,
-        comingSoon: true,
+        content: (
+          <div className="mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Change Time</TableHead>
+                  <TableHead>Change Type</TableHead>
+                  <TableHead>Details</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {auditLogs?.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell>
+                      {format(new Date(log.changed_at), 'PPpp')}
+                    </TableCell>
+                    <TableCell>{log.change_type}</TableCell>
+                    <TableCell>
+                      {log.changed_fields ? JSON.stringify(log.changed_fields, null, 2) : 'No details available'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ),
       },
     ],
   };
@@ -133,20 +224,24 @@ export default function Reports() {
         <CardDescription>{report.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button
-          onClick={() => report.generator ? handleDownload(report.title, report.generator) : undefined}
-          className="w-full"
-          disabled={report.comingSoon || isGenerating}
-        >
-          {report.comingSoon ? (
-            "Coming Soon"
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4" /> 
-              {isGenerating ? "Generating..." : "Download Report"}
-            </>
-          )}
-        </Button>
+        {report.content ? (
+          report.content
+        ) : (
+          <Button
+            onClick={() => report.generator ? handleDownload(report.title, report.generator) : undefined}
+            className="w-full"
+            disabled={report.comingSoon || isGenerating}
+          >
+            {report.comingSoon ? (
+              "Coming Soon"
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" /> 
+                {isGenerating ? "Generating..." : "Download Report"}
+              </>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

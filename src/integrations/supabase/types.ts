@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_audit_logs: {
+        Row: {
+          change_type: string
+          changed_at: string | null
+          changed_fields: Json | null
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          previous_values: Json | null
+          user_id: string
+        }
+        Insert: {
+          change_type: string
+          changed_at?: string | null
+          changed_fields?: Json | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          user_id: string
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string | null
+          changed_fields?: Json | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       alert_preferences: {
         Row: {
           auto_renewal: boolean | null
@@ -41,6 +74,33 @@ export type Database = {
           subscription_expiry?: boolean | null
           trial_ending?: boolean | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      login_history: {
+        Row: {
+          created_at: string | null
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          login_timestamp: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          login_timestamp?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          login_timestamp?: string | null
           user_id?: string
         }
         Relationships: []
