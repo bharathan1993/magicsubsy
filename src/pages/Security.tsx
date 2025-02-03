@@ -15,9 +15,44 @@ export default function Security() {
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+
+  const validateCurrentPassword = async () => {
+    setIsValidating(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: session?.user?.email || '',
+        password: currentPassword,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Current password is incorrect",
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to validate current password",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // First validate the current password
+    const isValid = await validateCurrentPassword();
+    if (!isValid) return;
+
     try {
       const { error } = await supabase.auth.updateUser({
         password: newPassword
@@ -77,6 +112,7 @@ export default function Security() {
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -86,9 +122,13 @@ export default function Security() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
                 />
               </div>
-              <Button type="submit">Update Password</Button>
+              <Button type="submit" disabled={isValidating}>
+                {isValidating ? "Validating..." : "Update Password"}
+              </Button>
             </form>
           </CardContent>
         </Card>
