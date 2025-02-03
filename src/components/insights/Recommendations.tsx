@@ -1,7 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, TrendingDown } from "lucide-react";
+import { AlertCircle, TrendingDown, LucideIcon } from "lucide-react";
+
+interface Recommendation {
+  title: string;
+  description: string;
+  type: 'savings' | 'warning';
+  icon: LucideIcon;
+}
 
 export function Recommendations() {
   const { data: recommendations = [], isLoading } = useQuery({
@@ -13,7 +20,7 @@ export function Recommendations() {
       
       if (error) throw error;
 
-      const recommendations = [];
+      const recommendations: Recommendation[] = [];
       
       const monthlySubscriptions = subscriptions.filter(sub => 
         sub.billing_cycle === 'monthly' && sub.amount > 0
