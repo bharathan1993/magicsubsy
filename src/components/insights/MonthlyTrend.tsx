@@ -38,25 +38,48 @@ export function MonthlyTrend() {
     }
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <Card className="w-full h-[400px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+        <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
+    <Card className="w-full bg-gradient-to-br from-background to-muted/50">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Monthly Trend</CardTitle>
-        <Calendar className="h-5 w-5 text-muted-foreground" />
+        <CardTitle className="text-xl font-semibold">Monthly Trend</CardTitle>
+        <Calendar className="h-5 w-5 text-muted-foreground/50" />
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
+        <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => formatAmount(value)} />
+            <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
+              <XAxis 
+                dataKey="month" 
+                className="text-xs text-muted-foreground"
+              />
+              <YAxis 
+                tickFormatter={(value) => formatAmount(value)}
+                className="text-xs text-muted-foreground"
+              />
               <Tooltip 
                 formatter={(value: number) => [formatAmount(value), "Amount"]}
+                contentStyle={{
+                  backgroundColor: "hsl(var(--background))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "var(--radius)",
+                }}
+                cursor={{ fill: 'hsl(var(--muted))' }}
               />
-              <Bar dataKey="amount" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+              <Bar 
+                dataKey="amount" 
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                className="hover:opacity-80 transition-opacity"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

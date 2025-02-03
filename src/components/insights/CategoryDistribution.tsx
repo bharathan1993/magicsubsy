@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444'];
 
 export function CategoryDistribution() {
   const { formatAmount } = useCurrency();
@@ -27,7 +27,6 @@ export function CategoryDistribution() {
         };
       }
 
-      // Calculate category distribution
       const categoryData = subs.reduce((acc: Record<string, number>, curr) => {
         const category = curr.category || 'Uncategorized';
         acc[category] = (acc[category] || 0) + Number(curr.amount);
@@ -47,8 +46,8 @@ export function CategoryDistribution() {
 
   if (isLoading) {
     return (
-      <Card className="min-h-[400px] flex items-center justify-center">
-        <div className="animate-pulse">Loading analysis...</div>
+      <Card className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+        <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
       </Card>
     );
   }
@@ -56,10 +55,10 @@ export function CategoryDistribution() {
   const chartData = analysis?.categoryDistribution || [];
 
   return (
-    <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+    <Card className="bg-gradient-to-br from-background to-muted/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <PieIcon className="h-5 w-5 text-primary" />
+        <CardTitle className="text-xl font-semibold flex items-center gap-2">
+          <PieIcon className="h-5 w-5 text-primary/50" />
           Category Distribution
         </CardTitle>
       </CardHeader>
@@ -77,11 +76,20 @@ export function CategoryDistribution() {
                 dataKey="value"
               >
                 {chartData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]}
+                    className="transition-opacity hover:opacity-80"
+                  />
                 ))}
               </Pie>
               <Tooltip
                 formatter={(value: number) => formatAmount(value)}
+                contentStyle={{
+                  backgroundColor: "hsl(var(--background))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "var(--radius)",
+                }}
               />
               <Legend />
             </PieChart>

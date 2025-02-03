@@ -15,7 +15,6 @@ export function MonthlyChanges() {
       
       if (error) throw error;
 
-      // For this example, we'll show billing cycle changes as "discounts"
       return subscriptions.map(sub => ({
         name: sub.name,
         change: sub.billing_cycle === 'annual' ? 
@@ -25,31 +24,39 @@ export function MonthlyChanges() {
     }
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <Card className="min-h-[200px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+        <div className="animate-pulse text-muted-foreground">Loading changes...</div>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-background to-muted/50">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Monthly Changes</CardTitle>
-        <TrendingUp className="h-5 w-5 text-muted-foreground" />
+        <CardTitle className="text-xl font-semibold">Monthly Changes</CardTitle>
+        <TrendingUp className="h-5 w-5 text-muted-foreground/50" />
       </CardHeader>
       <CardContent className="space-y-4">
         {changes.map((change, index) => (
           <div
             key={index}
-            className="flex items-center justify-between"
+            className="flex items-center justify-between p-3 rounded-lg border bg-card transition-colors hover:bg-muted/50"
           >
             <div className="flex items-center gap-2">
               <span className={`${
-                change.change.type === 'increase' ? 'text-red-500' : 'text-green-500'
+                change.change.type === 'increase' ? 'text-destructive' : 'text-green-500'
               }`}>
                 {change.change.type === 'increase' ? '↗' : '↘'}
               </span>
-              <span>{change.name} {change.change.type === 'increase' ? 'increased' : 'annual discount'}</span>
+              <span className="text-sm">
+                {change.name} {change.change.type === 'increase' ? 'increased' : 'annual discount'}
+              </span>
             </div>
             <span
-              className={`${
-                change.change.type === 'increase' ? 'text-red-500' : 'text-green-500'
+              className={`text-sm font-medium ${
+                change.change.type === 'increase' ? 'text-destructive' : 'text-green-500'
               }`}
             >
               {change.change.type === 'increase' ? '+' : ''}{change.change.value}%
