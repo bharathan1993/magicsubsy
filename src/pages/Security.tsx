@@ -83,13 +83,28 @@ export default function Security() {
 
   const fetchLoginSessions = async () => {
     try {
+      // Modified query to get only the latest login for each device
       const { data, error } = await supabase
         .from('login_history')
         .select('*')
+        .eq('user_id', session?.user?.id)
         .order('login_timestamp', { ascending: false });
 
       if (error) throw error;
-      setLoginSessions(data || []);
+
+      // Filter to keep only the latest entry for each unique device+IP combination
+      const uniqueSessions = data?.reduce((acc: LoginSession[], current) => {
+        const key = `${current.device_info}-${current.ip_address}`;
+        const exists = acc.find(session => 
+          `${session.device_info}-${session.ip_address}` === key
+        );
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      setLoginSessions(uniqueSessions || []);
     } catch (error: any) {
       toast({
         title: "Error",
