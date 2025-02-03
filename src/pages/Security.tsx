@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Shield, Key, Smartphone, LogOut } from "lucide-react";
+import { Shield, Key, Smartphone } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -26,6 +26,7 @@ export default function Security() {
   const [isValidating, setIsValidating] = useState(false);
   const [loginSessions, setLoginSessions] = useState<LoginSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeletingSession, setIsDeletingSession] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLoginSessions();
@@ -53,6 +54,8 @@ export default function Security() {
 
   const handleRemoveSession = async (sessionId: string) => {
     try {
+      setIsDeletingSession(sessionId);
+      
       const { error } = await supabase
         .from('login_history')
         .delete()
@@ -60,19 +63,23 @@ export default function Security() {
 
       if (error) throw error;
 
+      // Update local state to remove the deleted session
+      setLoginSessions(prevSessions => 
+        prevSessions.filter(session => session.id !== sessionId)
+      );
+
       toast({
         title: "Success",
         description: "Session removed successfully",
       });
-      
-      // Refresh the sessions list
-      fetchLoginSessions();
     } catch (error: any) {
       toast({
         title: "Error",
         description: "Failed to remove session",
         variant: "destructive",
       });
+    } finally {
+      setIsDeletingSession(null);
     }
   };
 
@@ -225,7 +232,7 @@ export default function Security() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <LogOut className="h-5 w-5" />
+              <Shield className="h-5 w-5" />
               Connected Devices & Sessions
             </CardTitle>
             <CardDescription>Manage your active sessions</CardDescription>
@@ -254,8 +261,9 @@ export default function Security() {
                           variant="destructive"
                           size="sm"
                           onClick={() => handleRemoveSession(session.id)}
+                          disabled={isDeletingSession === session.id}
                         >
-                          Remove
+                          {isDeletingSession === session.id ? "Removing..." : "Remove"}
                         </Button>
                       </TableCell>
                     </TableRow>
