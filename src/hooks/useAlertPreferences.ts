@@ -21,33 +21,39 @@ export const useAlertPreferences = () => {
   const { data: preferences, isLoading } = useQuery({
     queryKey: ['alert-preferences', session?.user.id],
     queryFn: async () => {
+      if (!session?.user.id) return null;
+
       const { data, error } = await supabase
         .from('alert_preferences')
         .select('*')
-        .eq('user_id', session?.user.id)
+        .eq('user_id', session.user.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error fetching preferences:', error);
-        return null;
+        throw error;
       }
       
       return data;
     },
     enabled: !!session?.user.id,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in garbage collection for 10 minutes
-    retry: false, // Don't retry on failure
-    refetchOnWindowFocus: false, // Don't refetch when window gains focus
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   const updatePreferences = useMutation({
     mutationFn: async (newPreferences: typeof defaultPreferences) => {
+      if (!session?.user.id) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('alert_preferences')
         .upsert({
+          user_id: session.user.id,
           ...newPreferences,
-          user_id: session?.user.id,
+        }, {
+          onConflict: 'user_id'
         })
         .select()
         .maybeSingle();
@@ -73,7 +79,7 @@ export const useAlertPreferences = () => {
         title: "Error saving settings",
         description: error.message,
         variant: "destructive",
-        duration: 3000, // 3 seconds duration
+        duration: 3000,
       });
     },
     onSuccess: (data) => {
@@ -81,7 +87,7 @@ export const useAlertPreferences = () => {
       toast({
         title: "Alert settings saved",
         description: "Your notification preferences have been updated.",
-        duration: 3000, // 3 seconds duration
+        duration: 3000,
       });
     },
   });
@@ -89,10 +95,11 @@ export const useAlertPreferences = () => {
   useEffect(() => {
     if (preferences) {
       setLocalPreferences(preferences);
-    } else {
+    } else if (!isLoading) {
+      // Only set default preferences if we're not loading and no preferences exist
       setLocalPreferences(defaultPreferences);
     }
-  }, [preferences]);
+  }, [preferences, isLoading]);
 
   // Initialize preferences only if they don't exist
   useEffect(() => {
