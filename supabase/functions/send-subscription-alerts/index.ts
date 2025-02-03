@@ -23,7 +23,6 @@ serve(async (req) => {
     
     if (test && email) {
       console.log(`Starting test email process for ${email}`);
-      console.log('RESEND_API_KEY exists:', !!Deno.env.get("RESEND_API_KEY"));
       
       // Get user profile
       const { data: profile, error: profileError } = await supabase
@@ -36,45 +35,20 @@ serve(async (req) => {
         console.error('Error fetching profile:', profileError);
       }
 
-      console.log('Profile data:', profile);
-      
       const userName = profile ? 
         `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Valued Customer' 
         : 'Valued Customer';
 
-      console.log('Attempting to send test email...');
-
       try {
-        // Send test email
         const emailResponse = await resend.emails.send({
           from: "Subsy <onboarding@resend.dev>",
           to: email,
           subject: `Test - Upcoming Payment Reminder for Your Netflix Subscription`,
           html: `
             <h1>Dear ${userName},</h1>
-            
-            <p>I hope this message finds you well.</p>
-            
-            <p>This is a friendly reminder that your subscription to Netflix is set to renew on ${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}.</p>
-            
-            <p>To ensure uninterrupted access to services, please ensure that the payment of $9.99 is processed by the renewal date.</p>
-            
-            <p>For your convenience, you can manage your subscription and payment methods through your Subsy dashboard:</p>
-            <ul>
-              <li>View subscription details</li>
-              <li>Update payment methods</li>
-              <li>Manage alert preferences</li>
-            </ul>
-            
-            <p>If you have any questions or need assistance with the payment process, please don't hesitate to reach out to our support team at support@subsy.app.</p>
-            
-            <p>Thank you for choosing Subsy. We value your continued partnership and look forward to serving you in the upcoming term.</p>
-            
-            <p>Best regards,<br>
-            Bharathan<br>
-            Founder-Subsy</p>
-            
-            <p style="color: #666; font-size: 12px;">Note: This is a test email. You can modify your alert preferences in your Subsy dashboard.</p>
+            <p>This is a test email to confirm your alert settings are working.</p>
+            <p>You will receive actual payment reminders based on your configured preferences.</p>
+            <p>Best regards,<br>The Subsy Team</p>
           `,
         });
 
@@ -94,87 +68,102 @@ serve(async (req) => {
       }
     }
 
-    // Get all subscriptions that need alerts
-    const { data: subscriptions, error: subError } = await supabase
-      .from('subscriptions')
+    // Get all users with their alert preferences and active subscriptions
+    const { data: usersWithPreferences, error: preferencesError } = await supabase
+      .from('alert_preferences')
       .select(`
-        *,
-        profiles!inner(email, first_name, last_name),
-        alert_preferences!inner(*)
+        user_id,
+        payment_reminder,
+        payment_reminder_days,
+        trial_ending,
+        auto_renewal,
+        subscription_expiry,
+        profiles!inner (
+          email,
+          first_name,
+          last_name
+        ),
+        subscriptions!inner (
+          name,
+          amount,
+          next_billing_date,
+          status
+        )
       `)
-      .gte('next_billing_date', new Date().toISOString())
-      .lte('next_billing_date', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
+      .eq('subscriptions.status', 'active');
 
-    if (subError) {
-      console.error('Error fetching subscriptions:', subError)
-      throw subError
+    if (preferencesError) {
+      console.error('Error fetching preferences:', preferencesError);
+      throw preferencesError;
     }
 
-    console.log(`Found ${subscriptions?.length || 0} subscriptions to process`)
+    console.log('Found users with preferences:', usersWithPreferences?.length);
 
-    const emailsSent = []
+    const emailsSent = [];
 
-    for (const sub of subscriptions) {
-      const daysUntilBilling = Math.ceil(
-        (new Date(sub.next_billing_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      )
+    for (const userPrefs of usersWithPreferences || []) {
+      const userName = `${userPrefs.profiles.first_name || ''} ${userPrefs.profiles.last_name || ''}`.trim() || 'Valued Customer';
+      
+      // Process each subscription for the user
+      for (const subscription of userPrefs.subscriptions) {
+        const daysUntilBilling = Math.ceil(
+          (new Date(subscription.next_billing_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        );
 
-      console.log(`Processing subscription ${sub.name}, days until billing: ${daysUntilBilling}`)
+        console.log(`Processing subscription ${subscription.name} for ${userName}, days until billing: ${daysUntilBilling}`);
 
-      // Check if we should send an alert based on user preferences
-      if (
-        sub.alert_preferences.payment_reminder &&
-        daysUntilBilling <= sub.alert_preferences.payment_reminder_days
-      ) {
-        const userName = `${sub.profiles.first_name || ''} ${sub.profiles.last_name || ''}`.trim() || 'Valued Customer'
-        
-        try {
-          const emailResponse = await resend.emails.send({
-            from: "Subsy <notifications@subsy.app>",
-            to: sub.profiles.email,
-            subject: `Upcoming Payment Reminder for Your ${sub.name} Subscription`,
-            html: `
-              <h1>Dear ${userName},</h1>
-              
-              <p>I hope this message finds you well.</p>
-              
-              <p>This is a friendly reminder that your subscription to ${sub.name} is set to renew on ${new Date(sub.next_billing_date).toLocaleDateString()}.</p>
-              
-              <p>To ensure uninterrupted access to services, please ensure that the payment of ${sub.amount} is processed by the renewal date.</p>
-              
-              <p>For your convenience, you can manage your subscription and payment methods through your Subsy dashboard:</p>
-              <ul>
-                <li>View subscription details</li>
-                <li>Update payment methods</li>
-                <li>Manage alert preferences</li>
-              </ul>
-              
-              <p>If you have any questions or need assistance with the payment process, please don't hesitate to reach out to our support team at support@subsy.app.</p>
-              
-              <p>Thank you for choosing Subsy. We value your continued partnership and look forward to serving you in the upcoming term.</p>
-              
-              <p>Best regards,<br>
-              Bharathan<br>
-              Founder-Subsy</p>
-              
-              <p style="color: #666; font-size: 12px;">Note: This is an automated reminder based on your alert preferences. You can modify these settings in your Subsy dashboard.</p>
-            `,
-          })
+        // Check if we should send a payment reminder based on user preferences
+        if (
+          userPrefs.payment_reminder &&
+          daysUntilBilling <= userPrefs.payment_reminder_days &&
+          daysUntilBilling >= 0
+        ) {
+          try {
+            const emailResponse = await resend.emails.send({
+              from: "Subsy <onboarding@resend.dev>",
+              to: userPrefs.profiles.email,
+              subject: `Payment Reminder: ${subscription.name} Subscription`,
+              html: `
+                <h1>Dear ${userName},</h1>
+                
+                <p>This is a friendly reminder that your subscription to ${subscription.name} is due for payment in ${daysUntilBilling} day${daysUntilBilling === 1 ? '' : 's'}.</p>
+                
+                <p>Payment Details:</p>
+                <ul>
+                  <li>Service: ${subscription.name}</li>
+                  <li>Amount: $${subscription.amount}</li>
+                  <li>Due Date: ${new Date(subscription.next_billing_date).toLocaleDateString()}</li>
+                </ul>
+                
+                <p>To ensure uninterrupted service, please ensure your payment method is up to date.</p>
+                
+                <p>Best regards,<br>
+                The Subsy Team</p>
+                
+                <p style="color: #666; font-size: 12px;">
+                  You received this email because you enabled payment reminders in your Subsy account.
+                  You can modify these settings in your alert preferences.
+                </p>
+              `,
+            });
 
-          console.log(`Sent payment reminder for ${sub.name} to ${sub.profiles.email}`, emailResponse)
-          emailsSent.push({
-            subscription: sub.name,
-            email: sub.profiles.email,
-            status: 'sent'
-          })
-        } catch (emailError) {
-          console.error(`Error sending email for ${sub.name}:`, emailError)
-          emailsSent.push({
-            subscription: sub.name,
-            email: sub.profiles.email,
-            status: 'failed',
-            error: emailError.message
-          })
+            console.log(`Payment reminder sent for ${subscription.name} to ${userPrefs.profiles.email}`);
+            emailsSent.push({
+              subscription: subscription.name,
+              email: userPrefs.profiles.email,
+              type: 'payment_reminder',
+              status: 'sent'
+            });
+          } catch (emailError) {
+            console.error(`Error sending payment reminder for ${subscription.name}:`, emailError);
+            emailsSent.push({
+              subscription: subscription.name,
+              email: userPrefs.profiles.email,
+              type: 'payment_reminder',
+              status: 'failed',
+              error: emailError.message
+            });
+          }
         }
       }
     }
@@ -185,12 +174,12 @@ serve(async (req) => {
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
+    });
   } catch (error) {
-    console.error('Error in send-subscription-alerts:', error)
+    console.error('Error in send-subscription-alerts:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
-    })
+    });
   }
-})
+});
