@@ -28,7 +28,7 @@ interface ReportType {
   title: string;
   description: string;
   icon: React.ReactNode;
-  generator: () => Promise<void>;
+  generator?: () => Promise<void>;
   comingSoon?: boolean;
 }
 
@@ -134,7 +134,7 @@ export default function Reports() {
       </CardHeader>
       <CardContent>
         <Button
-          onClick={() => handleDownload(report.title, report.generator)}
+          onClick={() => report.generator ? handleDownload(report.title, report.generator) : undefined}
           className="w-full"
           disabled={report.comingSoon || isGenerating}
         >
