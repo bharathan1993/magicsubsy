@@ -15,25 +15,52 @@ import {
   Clock,
   Activity,
 } from "lucide-react";
+import {
+  generateMonthlySpendingReport,
+  generateAnnualSpendingReport,
+  generateInvoiceHistory,
+  generatePlanChangeHistory,
+  generateUpcomingPayments
+} from "@/utils/reportGenerators";
 
 interface ReportType {
   id: string;
   title: string;
   description: string;
   icon: React.ReactNode;
+  generator: () => Promise<void>;
   comingSoon?: boolean;
 }
 
 export default function Reports() {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("financial");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleDownload = (reportTitle: string) => {
-    toast({
-      title: "Download Started",
-      description: `Preparing ${reportTitle} for download...`,
-    });
-    // Implement actual download logic here
+  const handleDownload = async (reportTitle: string, generator: () => Promise<void>) => {
+    try {
+      setIsGenerating(true);
+      toast({
+        title: "Generating Report",
+        description: `Preparing ${reportTitle}...`,
+      });
+      
+      await generator();
+      
+      toast({
+        title: "Report Ready",
+        description: `${reportTitle} has been downloaded.`,
+      });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const reportCategories = {
@@ -43,18 +70,21 @@ export default function Reports() {
         title: "Monthly Spending Report",
         description: "Detailed breakdown of transactions including upgrades, renewals, and downgrades",
         icon: <CreditCard className="h-5 w-5" />,
+        generator: generateMonthlySpendingReport,
       },
       {
         id: "annual-spending",
         title: "Annual Spending Report",
         description: "Yearly summary of all payments, refunds, and subscription changes",
         icon: <BarChart className="h-5 w-5" />,
+        generator: generateAnnualSpendingReport,
       },
       {
         id: "invoice-history",
         title: "Invoice & Billing History",
         description: "Access and download all past invoices and receipts",
         icon: <Receipt className="h-5 w-5" />,
+        generator: generateInvoiceHistory,
       },
     ],
     subscription: [
@@ -63,12 +93,14 @@ export default function Reports() {
         title: "Plan Change History",
         description: "Track all subscription plan changes including upgrades and downgrades",
         icon: <ArrowUpDown className="h-5 w-5" />,
+        generator: generatePlanChangeHistory,
       },
       {
         id: "upcoming-payments",
         title: "Upcoming Payments Report",
         description: "Preview of upcoming charges and renewal dates",
         icon: <Calendar className="h-5 w-5" />,
+        generator: generateUpcomingPayments,
       },
     ],
     security: [
@@ -77,12 +109,14 @@ export default function Reports() {
         title: "Login & Access History",
         description: "Comprehensive log of login locations, devices, and IP addresses",
         icon: <Shield className="h-5 w-5" />,
+        comingSoon: true,
       },
       {
         id: "account-changes",
         title: "Account Changes Report",
         description: "Track all profile edits, password changes, and contact updates",
         icon: <Activity className="h-5 w-5" />,
+        comingSoon: true,
       },
     ],
   };
@@ -100,15 +134,16 @@ export default function Reports() {
       </CardHeader>
       <CardContent>
         <Button
-          onClick={() => handleDownload(report.title)}
+          onClick={() => handleDownload(report.title, report.generator)}
           className="w-full"
-          disabled={report.comingSoon}
+          disabled={report.comingSoon || isGenerating}
         >
           {report.comingSoon ? (
             "Coming Soon"
           ) : (
             <>
-              <Download className="mr-2 h-4 w-4" /> Download Report
+              <Download className="mr-2 h-4 w-4" /> 
+              {isGenerating ? "Generating..." : "Download Report"}
             </>
           )}
         </Button>
