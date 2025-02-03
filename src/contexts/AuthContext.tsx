@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
+import { Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
 
 interface AuthContextType {
@@ -37,28 +37,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, currentSession) => {
       console.log('Auth state changed:', event);
       
-      if (event === 'SIGNED_OUT') {
-        setSession(null);
-        navigate('/landing');
-        toast({
-          title: "Signed Out",
-          description: "You have been signed out successfully.",
-        });
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setSession(currentSession);
-        if (window.location.pathname === '/landing' || window.location.pathname === '/auth') {
-          navigate('/app');
-        }
-      } else if (event === 'USER_DELETED') {
-        setSession(null);
-        navigate('/landing');
-        toast({
-          title: "Account Deleted",
-          description: "Your account has been deleted.",
-        });
+      switch (event) {
+        case 'SIGNED_OUT':
+          setSession(null);
+          navigate('/landing');
+          toast({
+            title: "Signed Out",
+            description: "You have been signed out successfully.",
+          });
+          break;
+          
+        case 'SIGNED_IN':
+        case 'TOKEN_REFRESHED':
+          setSession(currentSession);
+          if (window.location.pathname === '/landing' || window.location.pathname === '/auth') {
+            navigate('/app');
+          }
+          break;
+          
+        case 'USER_UPDATED':
+          setSession(currentSession);
+          toast({
+            title: "Account Updated",
+            description: "Your account information has been updated.",
+          });
+          break;
+          
+        case 'PASSWORD_RECOVERY':
+          navigate('/auth');
+          toast({
+            title: "Password Recovery",
+            description: "Please follow the instructions to reset your password.",
+          });
+          break;
       }
       
       setLoading(false);
