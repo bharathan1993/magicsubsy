@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Shield, Key, History, Smartphone, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, Key, Smartphone, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +8,14 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+interface LoginSession {
+  id: string;
+  login_timestamp: string;
+  device_info: string;
+  ip_address: string;
+}
 
 export default function Security() {
   const { session } = useAuth();
@@ -16,6 +24,57 @@ export default function Security() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const [loginSessions, setLoginSessions] = useState<LoginSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLoginSessions();
+  }, []);
+
+  const fetchLoginSessions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('login_history')
+        .select('*')
+        .order('login_timestamp', { ascending: false });
+
+      if (error) throw error;
+      setLoginSessions(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch login sessions",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemoveSession = async (sessionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('login_history')
+        .delete()
+        .eq('id', sessionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Session removed successfully",
+      });
+      
+      // Refresh the sessions list
+      fetchLoginSessions();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to remove session",
+        variant: "destructive",
+      });
+    }
+  };
 
   const validateCurrentPassword = async () => {
     setIsValidating(true);
@@ -49,7 +108,6 @@ export default function Security() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // First validate the current password
     const isValid = await validateCurrentPassword();
     if (!isValid) return;
 
@@ -76,12 +134,15 @@ export default function Security() {
   };
 
   const handleToggle2FA = async () => {
-    // This is a placeholder for 2FA implementation
     setIs2FAEnabled(!is2FAEnabled);
     toast({
       title: "Coming Soon",
       description: "2FA functionality will be available soon!",
     });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -160,25 +221,7 @@ export default function Security() {
           </CardContent>
         </Card>
 
-        {/* Login Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Login Activity
-            </CardTitle>
-            <CardDescription>View your recent login activity</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Coming soon: View and manage your recent login activity
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Connected Devices */}
+        {/* Connected Devices & Sessions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -188,11 +231,39 @@ export default function Security() {
             <CardDescription>Manage your active sessions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Coming soon: View and manage your connected devices and active sessions
-              </p>
-            </div>
+            {isLoading ? (
+              <p>Loading sessions...</p>
+            ) : loginSessions.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Device</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Login Time</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loginSessions.map((session) => (
+                    <TableRow key={session.id}>
+                      <TableCell>{session.device_info}</TableCell>
+                      <TableCell>{session.ip_address}</TableCell>
+                      <TableCell>{formatDate(session.login_timestamp)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleRemoveSession(session.id)}
+                        >
+                          Remove
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">No active sessions found</p>
+              )}
           </CardContent>
         </Card>
       </div>
