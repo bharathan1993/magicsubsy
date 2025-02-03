@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -7,15 +7,46 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function BudgetGoals() {
   const { toast } = useToast();
   const { formatAmount } = useCurrency();
+  const { session } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [monthlyGoal, setMonthlyGoal] = useState(200);
-  const [currentSpend, setCurrentSpend] = useState(175);
   const [userLevel, setUserLevel] = useState(3);
   const [userPoints, setUserPoints] = useState(2750);
+
+  const { data: currentSpend = 0 } = useQuery({
+    queryKey: ['monthlySpend', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return 0;
+      
+      const { data: subscriptions, error } = await supabase
+        .from('subscriptions')
+        .select('amount, billing_cycle')
+        .eq('user_id', session.user.id)
+        .eq('status', 'active');
+
+      if (error) {
+        console.error('Error fetching subscriptions:', error);
+        throw error;
+      }
+
+      // Calculate total monthly spend considering billing cycles
+      return subscriptions.reduce((total, sub) => {
+        let monthlyAmount = sub.amount;
+        if (sub.billing_cycle === 'quarterly') monthlyAmount = sub.amount / 3;
+        if (sub.billing_cycle === 'annual') monthlyAmount = sub.amount / 12;
+        return total + monthlyAmount;
+      }, 0);
+    },
+    enabled: !!session?.user?.id
+  });
+
   const progress = (currentSpend / monthlyGoal) * 100;
   
   const [achievements, setAchievements] = useState([
