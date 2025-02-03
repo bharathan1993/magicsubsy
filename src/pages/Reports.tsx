@@ -43,6 +43,7 @@ interface ReportType {
   icon: React.ReactNode;
   generator?: () => Promise<void>;
   comingSoon?: boolean;
+  content?: React.ReactNode; // Added this property to fix the TypeScript error
 }
 
 export default function Reports() {
@@ -106,111 +107,111 @@ export default function Reports() {
     }
   };
 
-  const reportCategories = {
-    financial: [
-      {
-        id: "monthly-spending",
-        title: "Monthly Spending Report",
-        description: "Detailed breakdown of transactions including upgrades, renewals, and downgrades",
-        icon: <CreditCard className="h-5 w-5" />,
-        generator: generateMonthlySpendingReport,
-      },
-      {
-        id: "annual-spending",
-        title: "Annual Spending Report",
-        description: "Yearly summary of all payments, refunds, and subscription changes",
-        icon: <BarChart className="h-5 w-5" />,
-        generator: generateAnnualSpendingReport,
-      },
-      {
-        id: "invoice-history",
-        title: "Invoice & Billing History",
-        description: "Access and download all past invoices and receipts",
-        icon: <Receipt className="h-5 w-5" />,
-        generator: generateInvoiceHistory,
-      },
-    ],
-    subscription: [
-      {
-        id: "plan-changes",
-        title: "Plan Change History",
-        description: "Track all subscription plan changes including upgrades and downgrades",
-        icon: <ArrowUpDown className="h-5 w-5" />,
-        generator: generatePlanChangeHistory,
-      },
-      {
-        id: "upcoming-payments",
-        title: "Upcoming Payments Report",
-        description: "Preview of upcoming charges and renewal dates",
-        icon: <Calendar className="h-5 w-5" />,
-        generator: generateUpcomingPayments,
-      },
-    ],
-    security: [
-      {
-        id: "login-history",
-        title: "Login & Access History",
-        description: "Comprehensive log of login locations, devices, and IP addresses",
-        icon: <History className="h-5 w-5" />,
-        content: (
-          <div className="mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Login Time</TableHead>
-                  <TableHead>IP Address</TableHead>
-                  <TableHead>Device Info</TableHead>
+const reportCategories = {
+  financial: [
+    {
+      id: "monthly-spending",
+      title: "Monthly Spending Report",
+      description: "Detailed breakdown of transactions including upgrades, renewals, and downgrades",
+      icon: <CreditCard className="h-5 w-5" />,
+      generator: generateMonthlySpendingReport,
+    },
+    {
+      id: "annual-spending",
+      title: "Annual Spending Report",
+      description: "Yearly summary of all payments, refunds, and subscription changes",
+      icon: <BarChart className="h-5 w-5" />,
+      generator: generateAnnualSpendingReport,
+    },
+    {
+      id: "invoice-history",
+      title: "Invoice & Billing History",
+      description: "Access and download all past invoices and receipts",
+      icon: <Receipt className="h-5 w-5" />,
+      generator: generateInvoiceHistory,
+    },
+  ],
+  subscription: [
+    {
+      id: "plan-changes",
+      title: "Plan Change History",
+      description: "Track all subscription plan changes including upgrades and downgrades",
+      icon: <ArrowUpDown className="h-5 w-5" />,
+      generator: generatePlanChangeHistory,
+    },
+    {
+      id: "upcoming-payments",
+      title: "Upcoming Payments Report",
+      description: "Preview of upcoming charges and renewal dates",
+      icon: <Calendar className="h-5 w-5" />,
+      generator: generateUpcomingPayments,
+    },
+  ],
+  security: [
+    {
+      id: "login-history",
+      title: "Login & Access History",
+      description: "Comprehensive log of login locations, devices, and IP addresses",
+      icon: <History className="h-5 w-5" />,
+      content: (
+        <div className="mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Login Time</TableHead>
+                <TableHead>IP Address</TableHead>
+                <TableHead>Device Info</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loginHistory?.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell>
+                    {format(new Date(log.login_timestamp), 'PPpp')}
+                  </TableCell>
+                  <TableCell>{log.ip_address}</TableCell>
+                  <TableCell>{log.device_info}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loginHistory?.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      {format(new Date(log.login_timestamp), 'PPpp')}
-                    </TableCell>
-                    <TableCell>{log.ip_address}</TableCell>
-                    <TableCell>{log.device_info}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ),
-      },
-      {
-        id: "account-changes",
-        title: "Account Changes Report",
-        description: "Track all profile edits, password changes, and contact updates",
-        icon: <Activity className="h-5 w-5" />,
-        content: (
-          <div className="mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Change Time</TableHead>
-                  <TableHead>Change Type</TableHead>
-                  <TableHead>Details</TableHead>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ),
+    },
+    {
+      id: "account-changes",
+      title: "Account Changes Report",
+      description: "Track all profile edits, password changes, and contact updates",
+      icon: <Activity className="h-5 w-5" />,
+      content: (
+        <div className="mt-4">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Change Time</TableHead>
+                <TableHead>Change Type</TableHead>
+                <TableHead>Details</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {auditLogs?.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell>
+                    {format(new Date(log.changed_at), 'PPpp')}
+                  </TableCell>
+                  <TableCell>{log.change_type}</TableCell>
+                  <TableCell>
+                    {log.changed_fields ? JSON.stringify(log.changed_fields, null, 2) : 'No details available'}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {auditLogs?.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      {format(new Date(log.changed_at), 'PPpp')}
-                    </TableCell>
-                    <TableCell>{log.change_type}</TableCell>
-                    <TableCell>
-                      {log.changed_fields ? JSON.stringify(log.changed_fields, null, 2) : 'No details available'}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ),
-      },
-    ],
-  };
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ),
+    },
+  ],
+};
 
   const ReportCard = ({ report }: { report: ReportType }) => (
     <Card className="hover:shadow-md transition-shadow">
