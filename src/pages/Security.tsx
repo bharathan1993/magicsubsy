@@ -17,6 +17,55 @@ interface LoginSession {
   ip_address: string;
 }
 
+const parseUserAgent = (userAgent: string) => {
+  // Basic device detection
+  const isMobile = /Mobile|Android|iPhone|iPad|iPod/i.test(userAgent);
+  const isTablet = /Tablet|iPad/i.test(userAgent);
+  
+  // Browser detection
+  const browserPatterns = {
+    'Chrome': /Chrome\/([0-9.]+)/,
+    'Firefox': /Firefox\/([0-9.]+)/,
+    'Safari': /Safari\/([0-9.]+)/,
+    'Edge': /Edg\/([0-9.]+)/,
+    'Opera': /OPR\/([0-9.]+)/
+  };
+
+  // OS detection
+  const osPatterns = {
+    'Windows': /Windows NT ([0-9.]+)/,
+    'Mac': /Macintosh.*Mac OS X ([0-9._]+)/,
+    'iOS': /iPhone OS ([0-9._]+)/,
+    'Android': /Android ([0-9.]+)/,
+    'Linux': /Linux/
+  };
+
+  // Determine device type
+  let deviceType = 'Desktop';
+  if (isTablet) deviceType = 'Tablet';
+  else if (isMobile) deviceType = 'Mobile';
+
+  // Determine browser
+  let browser = 'Unknown Browser';
+  for (const [name, pattern] of Object.entries(browserPatterns)) {
+    if (pattern.test(userAgent)) {
+      browser = name;
+      break;
+    }
+  }
+
+  // Determine OS
+  let os = 'Unknown OS';
+  for (const [name, pattern] of Object.entries(osPatterns)) {
+    if (pattern.test(userAgent)) {
+      os = name;
+      break;
+    }
+  }
+
+  return `${deviceType} - ${os} - ${browser}`;
+};
+
 export default function Security() {
   const { session } = useAuth();
   const { toast } = useToast();
@@ -50,6 +99,11 @@ export default function Security() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatDeviceInfo = (deviceInfo: string | null) => {
+    if (!deviceInfo) return 'Unknown Device';
+    return parseUserAgent(deviceInfo);
   };
 
   const handleRemoveSession = async (sessionId: string) => {
@@ -253,8 +307,8 @@ export default function Security() {
                 <TableBody>
                   {loginSessions.map((session) => (
                     <TableRow key={session.id}>
-                      <TableCell>{session.device_info}</TableCell>
-                      <TableCell>{session.ip_address}</TableCell>
+                      <TableCell>{formatDeviceInfo(session.device_info)}</TableCell>
+                      <TableCell>{session.ip_address || 'Unknown'}</TableCell>
                       <TableCell>{formatDate(session.login_timestamp)}</TableCell>
                       <TableCell>
                         <Button
