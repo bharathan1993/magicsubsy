@@ -5,6 +5,7 @@ import { TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SpendingData {
   date: Date;
@@ -14,26 +15,36 @@ interface SpendingData {
 export function SpendingPatternD3() {
   const svgRef = useRef<SVGSVGElement>(null);
   const { formatAmount } = useCurrency();
+  const { session } = useAuth();
 
   const { data: spendingData, isLoading } = useQuery({
-    queryKey: ['spendingPattern'],
+    queryKey: ['spendingPattern', session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
       const { data: subscriptions, error } = await supabase
         .from('subscriptions')
         .select('amount, activation_date')
+        .eq('user_id', session.user.id)
         .order('activation_date', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subscription data:', error);
+        throw error;
+      }
 
+      console.log('Fetched subscription data:', subscriptions);
+      
       return subscriptions.map(sub => ({
         date: new Date(sub.activation_date),
         amount: Number(sub.amount)
       }));
-    }
+    },
+    enabled: !!session?.user?.id
   });
 
   useEffect(() => {
-    if (!spendingData || !svgRef.current) return;
+    if (!spendingData || !svgRef.current || spendingData.length === 0) return;
 
     // Clear previous rendering
     d3.select(svgRef.current).selectAll("*").remove();
@@ -138,6 +149,14 @@ export function SpendingPatternD3() {
     return (
       <Card className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading visualization...</div>
+      </Card>
+    );
+  }
+
+  if (!spendingData || spendingData.length === 0) {
+    return (
+      <Card className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+        <div className="text-muted-foreground">No subscription data available</div>
       </Card>
     );
   }
