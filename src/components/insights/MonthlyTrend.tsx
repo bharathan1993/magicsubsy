@@ -40,20 +40,20 @@ export function MonthlyTrend() {
 
   if (isLoading) {
     return (
-      <Card className="w-full h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="w-full h-[200px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full h-full bg-gradient-to-br from-background to-muted/50">
+    <Card className="w-full h-[200px] bg-gradient-to-br from-background to-muted/50">
       <CardHeader className="flex flex-row items-center justify-between p-2">
         <CardTitle className="text-sm font-semibold">Monthly Trend</CardTitle>
         <Calendar className="h-4 w-4 text-muted-foreground/50" />
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[180px] w-full">
+        <div className="h-[150px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthlyData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />

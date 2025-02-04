@@ -16,7 +16,7 @@ export default function Insights() {
       
       <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
         {/* First row */}
-        <div className="h-[250px]">
+        <div className="h-[200px]">
           <MonthlyTrend />
         </div>
         <SpendingAnalysis />
