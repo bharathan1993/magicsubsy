@@ -3,6 +3,7 @@ import { SpendingAnalysis } from "@/components/insights/SpendingAnalysis";
 import { CategoryDistribution } from "@/components/insights/CategoryDistribution";
 import { MonthlyChanges } from "@/components/insights/MonthlyChanges";
 import { Recommendations } from "@/components/insights/Recommendations";
+import { SpendingPatternD3 } from "@/components/insights/SpendingPatternD3";
 
 export default function Insights() {
   return (
@@ -28,7 +29,7 @@ export default function Insights() {
           <CategoryDistribution />
         </div>
         <div className="h-[400px]">
-          <MonthlyChanges />
+          <SpendingPatternD3 />
         </div>
       </div>
 

@@ -285,7 +285,7 @@ export type Database = {
           id?: string | null
           name?: string | null
           next_billing_date?: string | null
-          status?: never
+          status?: string | null
           subscription_type?: string | null
           user_id?: string | null
           website_url?: string | null
@@ -298,7 +298,7 @@ export type Database = {
           id?: string | null
           name?: string | null
           next_billing_date?: string | null
-          status?: never
+          status?: string | null
           subscription_type?: string | null
           user_id?: string | null
           website_url?: string | null
