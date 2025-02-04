@@ -8,52 +8,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface CancelSubscriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  subscriptionId?: string; // Optional to maintain backwards compatibility
 }
 
-export function CancelSubscriptionDialog({ open, onOpenChange }: CancelSubscriptionDialogProps) {
-  const [selectedSubscription, setSelectedSubscription] = useState<string>("");
+export function CancelSubscriptionDialog({ 
+  open, 
+  onOpenChange,
+  subscriptionId 
+}: CancelSubscriptionDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useAuth();
 
-  const { data: subscriptions = [] } = useQuery({
-    queryKey: ['subscriptions', session?.user?.id],
-    queryFn: async () => {
-      if (!session?.user?.id) return [];
-      
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq('user_id', session.user.id)
-        .eq('status', 'active');
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!session?.user?.id
-  });
-
   const handleCancel = async () => {
-    if (!selectedSubscription || !session?.user?.id) {
+    if (!subscriptionId || !session?.user?.id) {
       toast({
         title: "Error",
-        description: "Please select a subscription to cancel.",
+        description: "Unable to cancel subscription. Please try again.",
         variant: "destructive",
       });
       return;
@@ -63,7 +42,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange }: CancelSubscript
       const { error } = await supabase
         .from('subscriptions')
         .update({ status: 'cancelled' })
-        .eq('id', selectedSubscription)
+        .eq('id', subscriptionId)
         .eq('user_id', session.user.id);
 
       if (error) throw error;
@@ -75,7 +54,6 @@ export function CancelSubscriptionDialog({ open, onOpenChange }: CancelSubscript
 
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       onOpenChange(false);
-      setSelectedSubscription("");
     } catch (error) {
       console.error('Error cancelling subscription:', error);
       toast({
@@ -92,40 +70,18 @@ export function CancelSubscriptionDialog({ open, onOpenChange }: CancelSubscript
         <DialogHeader>
           <DialogTitle>Cancel Subscription</DialogTitle>
           <DialogDescription>
-            Select the subscription you want to cancel.
+            Are you sure you want to cancel this subscription? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="subscription" className="text-right">
-              Subscription
-            </Label>
-            <Select
-              value={selectedSubscription}
-              onValueChange={setSelectedSubscription}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a subscription" />
-              </SelectTrigger>
-              <SelectContent>
-                {subscriptions.map((sub) => (
-                  <SelectItem key={sub.id} value={sub.id}>
-                    {sub.name} - {sub.amount}/month
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            Keep Subscription
           </Button>
           <Button 
             onClick={handleCancel}
             variant="destructive"
           >
-            Confirm Cancellation
+            Yes, Cancel Subscription
           </Button>
         </DialogFooter>
       </DialogContent>

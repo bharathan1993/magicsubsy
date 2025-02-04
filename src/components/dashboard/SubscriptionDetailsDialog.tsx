@@ -136,6 +136,7 @@ export function SubscriptionDetailsDialog({
       <CancelSubscriptionDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
+        subscriptionId={subscription.id}
       />
     </>
   );
