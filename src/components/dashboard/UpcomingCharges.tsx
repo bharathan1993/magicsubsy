@@ -3,16 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Calendar } from "lucide-react";
-
-interface Subscription {
-  id: string;
-  name: string;
-  amount: number;
-  next_billing_date: string;
-}
+import { SubscriptionDetailsDialog } from "./SubscriptionDetailsDialog";
+import { Subscription } from "@/types/subscription";
 
 export function UpcomingCharges() {
   const [upcomingCharges, setUpcomingCharges] = useState<Subscription[]>([]);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { formatAmount } = useCurrency();
 
   useEffect(() => {
@@ -22,7 +19,7 @@ export function UpcomingCharges() {
 
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("id, name, amount, next_billing_date")
+        .select("*")
         .lte("next_billing_date", thirtyDaysFromNow.toISOString().split('T')[0])
         .gte("next_billing_date", new Date().toISOString().split('T')[0])
         .order("next_billing_date", { ascending: true });
@@ -35,37 +32,51 @@ export function UpcomingCharges() {
     fetchUpcomingCharges();
   }, []);
 
+  const handleSubscriptionClick = (subscription: Subscription) => {
+    setSelectedSubscription(subscription);
+    setIsDetailsOpen(true);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Upcoming Charges</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {upcomingCharges.map((charge) => (
-            <div
-              key={charge.id}
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
-            >
-              <div className="flex items-center gap-4">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{charge.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(charge.next_billing_date).toLocaleDateString()}
-                  </p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Upcoming Charges</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {upcomingCharges.map((charge) => (
+              <div
+                key={charge.id}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-accent cursor-pointer"
+                onClick={() => handleSubscriptionClick(charge)}
+              >
+                <div className="flex items-center gap-4">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">{charge.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(charge.next_billing_date).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
+                <p className="font-medium">{formatAmount(charge.amount)}</p>
               </div>
-              <p className="font-medium">{formatAmount(charge.amount)}</p>
-            </div>
-          ))}
-          {upcomingCharges.length === 0 && (
-            <p className="text-center text-muted-foreground">
-              No upcoming charges in the next 30 days
-            </p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+            {upcomingCharges.length === 0 && (
+              <p className="text-center text-muted-foreground">
+                No upcoming charges in the next 30 days
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <SubscriptionDetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        subscription={selectedSubscription}
+      />
+    </>
   );
 }
