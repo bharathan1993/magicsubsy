@@ -2,46 +2,17 @@ import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface SpendingData {
-  date: Date;
-  amount: number;
-}
+import { setupD3Chart, createLine, addDataPoints } from './utils/d3Utils';
+import { useSpendingData } from './hooks/useSpendingData';
+import { ChartDimensions } from './types/spendingTypes';
 
 export function SpendingPatternD3() {
   const svgRef = useRef<SVGSVGElement>(null);
   const { formatAmount } = useCurrency();
   const { session } = useAuth();
-
-  const { data: spendingData, isLoading } = useQuery({
-    queryKey: ['spendingPattern', session?.user?.id],
-    queryFn: async () => {
-      if (!session?.user?.id) return [];
-      
-      const { data: subscriptions, error } = await supabase
-        .from('subscriptions')
-        .select('amount, activation_date')
-        .eq('user_id', session.user.id)
-        .order('activation_date', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching subscription data:', error);
-        throw error;
-      }
-
-      console.log('Fetched subscription data:', subscriptions);
-      
-      return subscriptions.map(sub => ({
-        date: new Date(sub.activation_date),
-        amount: Number(sub.amount)
-      }));
-    },
-    enabled: !!session?.user?.id
-  });
+  const { data: spendingData, isLoading } = useSpendingData(session?.user?.id);
 
   useEffect(() => {
     if (!spendingData || !svgRef.current || spendingData.length === 0) return;
@@ -49,45 +20,33 @@ export function SpendingPatternD3() {
     // Clear previous rendering
     d3.select(svgRef.current).selectAll("*").remove();
 
-    // Set dimensions
-    const margin = { top: 20, right: 30, bottom: 30, left: 60 };
-    const width = svgRef.current.clientWidth - margin.left - margin.right;
-    const height = 300 - margin.top - margin.bottom;
+    const dimensions: ChartDimensions = {
+      margin: { top: 20, right: 30, bottom: 30, left: 60 },
+      width: svgRef.current.clientWidth - 60 - 30, // margin.left + margin.right
+      height: 300 - 20 - 30 // margin.top + margin.bottom
+    };
 
     // Create SVG
     const svg = d3.select(svgRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", dimensions.width + dimensions.margin.left + dimensions.margin.right)
+      .attr("height", dimensions.height + dimensions.margin.top + dimensions.margin.bottom)
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${dimensions.margin.left},${dimensions.margin.top})`);
 
     // Set scales
     const xScale = d3.scaleTime()
       .domain(d3.extent(spendingData, d => d.date) as [Date, Date])
-      .range([0, width]);
+      .range([0, dimensions.width]);
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(spendingData, d => d.amount) as number])
-      .range([height, 0]);
+      .range([dimensions.height, 0]);
 
-    // Create line generator
-    const line = d3.line<SpendingData>()
-      .x(d => xScale(d.date))
-      .y(d => yScale(d.amount))
-      .curve(d3.curveMonotoneX);
+    // Setup basic chart elements
+    setupD3Chart(svg, dimensions.width, dimensions.height, spendingData, xScale, yScale, formatAmount);
 
-    // Add axes
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .attr("class", "text-muted-foreground text-xs")
-      .call(d3.axisBottom(xScale));
-
-    svg.append("g")
-      .attr("class", "text-muted-foreground text-xs")
-      .call(d3.axisLeft(yScale)
-        .tickFormat(d => formatAmount(d as number)));
-
-    // Add the line path
+    // Create and add the line
+    const line = createLine(xScale, yScale);
     const path = svg.append("path")
       .datum(spendingData)
       .attr("fill", "none")
@@ -95,44 +54,8 @@ export function SpendingPatternD3() {
       .attr("stroke-width", 2)
       .attr("d", line);
 
-    // Add interactive dots
-    const dots = svg.selectAll(".dot")
-      .data(spendingData)
-      .enter()
-      .append("circle")
-      .attr("class", "dot")
-      .attr("cx", d => xScale(d.date))
-      .attr("cy", d => yScale(d.amount))
-      .attr("r", 4)
-      .attr("fill", "hsl(var(--primary))")
-      .style("opacity", 0);
-
-    // Add hover effects
-    const tooltip = d3.select("body")
-      .append("div")
-      .attr("class", "absolute hidden bg-background border border-border rounded-md p-2 text-xs shadow-lg");
-
-    svg.selectAll("circle")
-      .on("mouseover", function(event, d: SpendingData) {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", 1);
-
-        tooltip
-          .style("display", "block")
-          .html(`Date: ${d.date.toLocaleDateString()}<br/>Amount: ${formatAmount(d.amount)}`)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 10) + "px");
-      })
-      .on("mouseout", function() {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", 0);
-
-        tooltip.style("display", "none");
-      });
+    // Add data points and tooltips
+    const tooltip = addDataPoints(svg, spendingData, xScale, yScale, formatAmount);
 
     // Add animation
     const pathLength = path.node()?.getTotalLength() || 0;
@@ -143,6 +66,10 @@ export function SpendingPatternD3() {
       .duration(2000)
       .attr("stroke-dashoffset", 0);
 
+    // Cleanup
+    return () => {
+      tooltip.remove();
+    };
   }, [spendingData, formatAmount]);
 
   if (isLoading) {
