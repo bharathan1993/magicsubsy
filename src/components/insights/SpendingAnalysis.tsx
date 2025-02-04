@@ -47,66 +47,64 @@ export function SpendingAnalysis() {
 
   if (isLoading) {
     return (
-      <Card className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-gradient-to-br from-background to-muted/50">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold flex items-center gap-2">
+    <Card className="h-full bg-gradient-to-br from-background to-muted/50">
+      <CardHeader className="p-4">
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-primary/50" />
           Spending Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid gap-4">
-            <div className="p-4 rounded-lg border bg-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Highest Expense</p>
-                  <h3 className="text-2xl font-semibold mt-1">
-                    {formatAmount(analysis?.highest.amount || 0)}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {analysis?.highest.name}
-                  </p>
-                </div>
-                <ArrowUpCircle className="h-8 w-8 text-destructive/50" />
+      <CardContent className="p-4">
+        <div className="grid gap-3">
+          <div className="p-3 rounded-lg border bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Highest Expense</p>
+                <h3 className="text-xl font-semibold mt-0.5">
+                  {formatAmount(analysis?.highest.amount || 0)}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {analysis?.highest.name}
+                </p>
               </div>
+              <ArrowUpCircle className="h-6 w-6 text-destructive/50" />
             </div>
+          </div>
 
-            <div className="p-4 rounded-lg border bg-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Lowest Expense</p>
-                  <h3 className="text-2xl font-semibold mt-1">
-                    {formatAmount(analysis?.lowest.amount || 0)}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {analysis?.lowest.name}
-                  </p>
-                </div>
-                <ArrowDownCircle className="h-8 w-8 text-green-500/50" />
+          <div className="p-3 rounded-lg border bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Lowest Expense</p>
+                <h3 className="text-xl font-semibold mt-0.5">
+                  {formatAmount(analysis?.lowest.amount || 0)}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {analysis?.lowest.name}
+                </p>
               </div>
+              <ArrowDownCircle className="h-6 w-6 text-green-500/50" />
             </div>
+          </div>
 
-            <div className="p-4 rounded-lg border bg-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Average Cost</p>
-                  <h3 className="text-2xl font-semibold mt-1">
-                    {formatAmount(analysis?.average || 0)}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Per Subscription
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-blue-500/50" />
+          <div className="p-3 rounded-lg border bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Average Cost</p>
+                <h3 className="text-xl font-semibold mt-0.5">
+                  {formatAmount(analysis?.average || 0)}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Per Subscription
+                </p>
               </div>
+              <DollarSign className="h-6 w-6 text-blue-500/50" />
             </div>
           </div>
         </div>
