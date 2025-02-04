@@ -44,13 +44,14 @@ const adjustOverlappingPoints = (data: SpendingData[], xScale: d3.ScaleTime<numb
     dateGroups.set(dateKey, existing);
   });
 
-  // Calculate offsets for overlapping points
+  // Calculate offsets for overlapping points with increased spacing
   const offsetData = data.map(d => {
     const dateKey = d.date.toISOString().split('T')[0];
     const group = dateGroups.get(dateKey) || [];
     if (group.length > 1) {
       const index = group.indexOf(d);
-      const offset = (index - (group.length - 1) / 2) * 20; // 20px offset between points
+      // Increased offset to 30px and adjusted calculation for better spacing
+      const offset = (index - (group.length - 1) / 2) * 30;
       return { ...d, xOffset: offset };
     }
     return { ...d, xOffset: 0 };
@@ -73,6 +74,7 @@ export const addDataPoints = (
   // Adjust positions for overlapping points
   const adjustedData = adjustOverlappingPoints(data, xScale);
 
+  // Add dots with adjusted positions
   const dots = svg.selectAll(".dot")
     .data(adjustedData)
     .enter()
