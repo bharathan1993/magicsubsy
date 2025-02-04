@@ -18,6 +18,7 @@ export default function Subscriptions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
 
   const { data: subscriptions = [], refetch } = useQuery({
     queryKey: ['subscriptions'],
@@ -91,6 +92,8 @@ export default function Subscriptions() {
               onCategoryChange={setSelectedCategory}
               selectedStatus={selectedStatus}
               onStatusChange={setSelectedStatus}
+              selectedType={selectedType}
+              onTypeChange={setSelectedType}
             />
             <SubscriptionTable
               subscriptions={subscriptions}
@@ -98,6 +101,7 @@ export default function Subscriptions() {
               searchQuery={searchQuery}
               selectedCategory={selectedCategory}
               selectedStatus={selectedStatus}
+              selectedType={selectedType}
             />
           </CardContent>
         </Card>

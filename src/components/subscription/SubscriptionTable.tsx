@@ -39,6 +39,7 @@ interface SubscriptionTableProps {
   searchQuery: string;
   selectedCategory: string;
   selectedStatus: string;
+  selectedType: string;
 }
 
 export function SubscriptionTable({ 
@@ -46,7 +47,8 @@ export function SubscriptionTable({
   onEdit,
   searchQuery,
   selectedCategory,
-  selectedStatus
+  selectedStatus,
+  selectedType
 }: SubscriptionTableProps) {
   const { formatAmount } = useCurrency();
   const { toast } = useToast();
@@ -139,7 +141,8 @@ export function SubscriptionTable({
     const matchesSearch = subscription.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || subscription.category === selectedCategory;
     const matchesStatus = selectedStatus === "all" || subscription.status.toLowerCase() === selectedStatus.toLowerCase();
-    return matchesSearch && matchesCategory && matchesStatus;
+    const matchesType = selectedType === "all" || subscription.subscription_type === selectedType;
+    return matchesSearch && matchesCategory && matchesStatus && matchesType;
   });
 
   return (
