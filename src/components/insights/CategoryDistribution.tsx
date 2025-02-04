@@ -46,7 +46,7 @@ export function CategoryDistribution() {
 
   if (isLoading) {
     return (
-      <Card className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
       </Card>
     );
@@ -56,22 +56,22 @@ export function CategoryDistribution() {
 
   return (
     <Card className="bg-gradient-to-br from-background to-muted/50">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold flex items-center gap-2">
-          <PieIcon className="h-5 w-5 text-primary/50" />
+      <CardHeader className="p-2">
+        <CardTitle className="text-sm font-semibold flex items-center gap-2">
+          <PieIcon className="h-4 w-4 text-primary/50" />
           Category Distribution
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px] relative">
+      <CardContent className="p-2">
+        <div className="h-[200px] relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
+                innerRadius={40}
+                outerRadius={60}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -89,9 +89,10 @@ export function CategoryDistribution() {
                   backgroundColor: "hsl(var(--background))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "var(--radius)",
+                  fontSize: "12px"
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '10px' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>

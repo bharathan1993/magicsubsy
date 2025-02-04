@@ -14,19 +14,21 @@ export default function Insights() {
         </p>
       </div>
       
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 transition-all">
-        <div className="col-span-1 md:col-span-2 h-[300px]">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        {/* First row */}
+        <div className="h-[250px]">
           <MonthlyTrend />
         </div>
         <SpendingAnalysis />
+
+        {/* Second row */}
         <CategoryDistribution />
+        <MonthlyChanges />
       </div>
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <MonthlyChanges />
-        <div className="col-span-1 md:col-span-2">
-          <Recommendations />
-        </div>
+      {/* Recommendations at the bottom */}
+      <div className="mt-4">
+        <Recommendations />
       </div>
     </div>
   );
