@@ -78,6 +78,48 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_cancel_settings: {
+        Row: {
+          cancel_date: string
+          created_at: string | null
+          id: string
+          subscription_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_date: string
+          created_at?: string | null
+          id?: string
+          subscription_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_date?: string
+          created_at?: string | null
+          id?: string
+          subscription_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_cancel_settings_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_cancel_settings_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           created_at: string | null

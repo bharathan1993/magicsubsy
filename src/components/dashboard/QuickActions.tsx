@@ -1,12 +1,16 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, List, X, Settings } from "lucide-react";
+import { Plus, List, CalendarX, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NewSubscriptionDialog } from "./NewSubscriptionDialog";
+import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
+import { AutoCancelSettingsDialog } from "./AutoCancelSettingsDialog";
 
 export function QuickActions() {
   const [showNewSubscriptionDialog, setShowNewSubscriptionDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showAutoCancelDialog, setShowAutoCancelDialog] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -33,17 +37,35 @@ export function QuickActions() {
         >
           <List className="mr-2 h-4 w-4" /> Manage Subscriptions
         </Button>
-        <Button className="w-full justify-start" variant="outline">
-          <X className="mr-2 h-4 w-4" /> Cancel a Subscription
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => setShowCancelDialog(true)}
+        >
+          <CalendarX className="mr-2 h-4 w-4" /> Cancel a Subscription
         </Button>
-        <Button className="w-full justify-start" variant="outline">
-          <Settings className="mr-2 h-4 w-4" /> Auto-Cancel Settings
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => setShowAutoCancelDialog(true)}
+        >
+          <Settings2 className="mr-2 h-4 w-4" /> Auto-Cancel Settings
         </Button>
       </div>
 
       <NewSubscriptionDialog 
         open={showNewSubscriptionDialog} 
         onOpenChange={setShowNewSubscriptionDialog}
+      />
+
+      <CancelSubscriptionDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+      />
+
+      <AutoCancelSettingsDialog
+        open={showAutoCancelDialog}
+        onOpenChange={setShowAutoCancelDialog}
       />
     </Card>
   );
