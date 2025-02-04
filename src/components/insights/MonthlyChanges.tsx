@@ -26,7 +26,7 @@ export function MonthlyChanges() {
 
   if (isLoading) {
     return (
-      <Card className="min-h-[200px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="min-h-[150px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading changes...</div>
       </Card>
     );
@@ -34,15 +34,15 @@ export function MonthlyChanges() {
 
   return (
     <Card className="bg-gradient-to-br from-background to-muted/50">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-semibold">Monthly Changes</CardTitle>
-        <TrendingUp className="h-5 w-5 text-muted-foreground/50" />
+      <CardHeader className="flex flex-row items-center justify-between p-4">
+        <CardTitle className="text-lg font-semibold">Monthly Changes</CardTitle>
+        <TrendingUp className="h-4 w-4 text-muted-foreground/50" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2 p-4 pt-0">
         {changes.map((change, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-3 rounded-lg border bg-card transition-colors hover:bg-muted/50"
+            className="flex items-center justify-between p-2 rounded-lg border bg-card transition-colors hover:bg-muted/50"
           >
             <div className="flex items-center gap-2">
               <span className={`${

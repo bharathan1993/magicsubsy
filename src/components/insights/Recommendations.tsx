@@ -7,9 +7,9 @@ export function Recommendations() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Recommendations</h2>
-        <Card className="min-h-[100px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">Recommendations</h2>
+        <Card className="min-h-[80px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
           <div className="animate-pulse text-muted-foreground">Loading recommendations...</div>
         </Card>
       </div>
@@ -17,9 +17,9 @@ export function Recommendations() {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Recommendations</h2>
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+    <div className="space-y-2">
+      <h2 className="text-lg font-semibold">Recommendations</h2>
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
         {recommendations.map((recommendation, index) => (
           <RecommendationCard key={index} {...recommendation} />
         ))}

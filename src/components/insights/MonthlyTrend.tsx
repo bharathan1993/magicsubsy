@@ -40,22 +40,22 @@ export function MonthlyTrend() {
 
   if (isLoading) {
     return (
-      <Card className="w-full h-[400px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="w-full h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading analysis...</div>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full bg-gradient-to-br from-background to-muted/50">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-semibold">Monthly Trend</CardTitle>
-        <Calendar className="h-5 w-5 text-muted-foreground/50" />
+    <Card className="w-full h-full bg-gradient-to-br from-background to-muted/50">
+      <CardHeader className="flex flex-row items-center justify-between p-4">
+        <CardTitle className="text-lg font-semibold">Monthly Trend</CardTitle>
+        <Calendar className="h-4 w-4 text-muted-foreground/50" />
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
+      <CardContent className="p-0">
+        <div className="h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={monthlyData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
               <XAxis 
                 dataKey="month" 
