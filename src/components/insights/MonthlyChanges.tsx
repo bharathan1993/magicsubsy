@@ -26,23 +26,23 @@ export function MonthlyChanges() {
 
   if (isLoading) {
     return (
-      <Card className="min-h-[150px] flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
+      <Card className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted/50">
         <div className="animate-pulse text-muted-foreground">Loading changes...</div>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-gradient-to-br from-background to-muted/50">
+    <Card className="h-full bg-gradient-to-br from-background to-muted/50">
       <CardHeader className="flex flex-row items-center justify-between p-4">
         <CardTitle className="text-lg font-semibold">Monthly Changes</CardTitle>
         <TrendingUp className="h-4 w-4 text-muted-foreground/50" />
       </CardHeader>
-      <CardContent className="space-y-2 p-4 pt-0">
+      <CardContent className="space-y-4 p-4">
         {changes.map((change, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-2 rounded-lg border bg-card transition-colors hover:bg-muted/50"
+            className="flex items-center justify-between p-4 rounded-lg border bg-card transition-colors hover:bg-muted/50"
           >
             <div className="flex items-center gap-2">
               <span className={`${

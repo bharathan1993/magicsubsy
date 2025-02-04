@@ -55,23 +55,23 @@ export function CategoryDistribution() {
   const chartData = analysis?.categoryDistribution || [];
 
   return (
-    <Card className="bg-gradient-to-br from-background to-muted/50">
-      <CardHeader className="p-2">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2">
+    <Card className="h-full bg-gradient-to-br from-background to-muted/50">
+      <CardHeader className="p-4">
+        <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <PieIcon className="h-4 w-4 text-primary/50" />
           Category Distribution
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-2">
-        <div className="h-[200px] relative">
+      <CardContent className="p-4">
+        <div className="h-[300px] relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={40}
-                outerRadius={60}
+                innerRadius={60}
+                outerRadius={90}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -92,7 +92,7 @@ export function CategoryDistribution() {
                   fontSize: "12px"
                 }}
               />
-              <Legend wrapperStyle={{ fontSize: '10px' }} />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>

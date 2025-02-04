@@ -19,11 +19,17 @@ export default function Insights() {
         <div className="h-[400px]">
           <MonthlyTrend />
         </div>
-        <SpendingAnalysis />
+        <div className="h-[400px]">
+          <SpendingAnalysis />
+        </div>
 
         {/* Second row */}
-        <CategoryDistribution />
-        <MonthlyChanges />
+        <div className="h-[400px]">
+          <CategoryDistribution />
+        </div>
+        <div className="h-[400px]">
+          <MonthlyChanges />
+        </div>
       </div>
 
       {/* Recommendations at the bottom */}
