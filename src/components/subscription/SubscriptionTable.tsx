@@ -1,37 +1,13 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
-import { useCurrency } from "@/contexts/CurrencyContext";
-import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
-import { SubscriptionActions } from "./SubscriptionActions";
+import { Table, TableBody } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface Subscription {
-  id: string;
-  name: string;
-  amount: number;
-  billing_cycle: string;
-  next_billing_date: string;
-  category: string;
-  website_url: string | null;
-  activation_date: string;
-  subscription_type: string;
-  status: string;
-}
+import { SubscriptionTableHeader } from "./SubscriptionTableHeader";
+import { SubscriptionTableRow } from "./SubscriptionTableRow";
+import { DeleteSubscriptionDialog } from "./DeleteSubscriptionDialog";
+import { Subscription } from "@/types/subscription";
 
 interface SubscriptionTableProps {
   subscriptions: Subscription[];
@@ -50,7 +26,6 @@ export function SubscriptionTable({
   selectedStatus,
   selectedType
 }: SubscriptionTableProps) {
-  const { formatAmount } = useCurrency();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [subscriptionToDelete, setSubscriptionToDelete] = useState<string | null>(null);
@@ -59,7 +34,7 @@ export function SubscriptionTable({
   // Function to check if a subscription is expired
   const isSubscriptionExpired = (nextBillingDate: string): boolean => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time part for date comparison
+    today.setHours(0, 0, 0, 0);
     const billingDate = new Date(nextBillingDate);
     return billingDate < today;
   };
@@ -85,7 +60,6 @@ export function SubscriptionTable({
           }
         }
       }
-      // Refresh the subscriptions data
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
     };
 
@@ -103,22 +77,14 @@ export function SubscriptionTable({
     }
 
     try {
-      console.log('Attempting to delete subscription:', subscriptionToDelete);
-      
       const { error } = await supabase
         .from('subscriptions')
         .delete()
         .eq('id', subscriptionToDelete)
         .eq('user_id', session.user.id);
 
-      if (error) {
-        console.error('Supabase delete error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Successfully deleted subscription');
-
-      // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
 
       toast({
@@ -148,78 +114,24 @@ export function SubscriptionTable({
   return (
     <>
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Billing Cycle</TableHead>
-            <TableHead>Next Billing</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+        <SubscriptionTableHeader />
         <TableBody>
           {filteredSubscriptions.map((subscription) => (
-            <TableRow key={subscription.id}>
-              <TableCell className="font-medium">{subscription.name}</TableCell>
-              <TableCell>{formatAmount(subscription.amount)}</TableCell>
-              <TableCell className="capitalize">{subscription.billing_cycle}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  {new Date(subscription.next_billing_date).toLocaleDateString()}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary" className="capitalize">
-                  {subscription.category}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline" className="capitalize">
-                  {subscription.subscription_type}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <SubscriptionStatusBadge status={subscription.status} />
-              </TableCell>
-              <TableCell>
-                <SubscriptionActions
-                  subscriptionId={subscription.id}
-                  websiteUrl={subscription.website_url}
-                  onEdit={() => onEdit(subscription)}
-                  onDelete={() => setSubscriptionToDelete(subscription.id)}
-                />
-              </TableCell>
-            </TableRow>
+            <SubscriptionTableRow
+              key={subscription.id}
+              subscription={subscription}
+              onEdit={onEdit}
+              onDelete={setSubscriptionToDelete}
+            />
           ))}
         </TableBody>
       </Table>
 
-      <AlertDialog 
-        open={!!subscriptionToDelete} 
+      <DeleteSubscriptionDialog
+        open={!!subscriptionToDelete}
         onOpenChange={(open) => !open && setSubscriptionToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the subscription.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteClick}
-              className="bg-red-500 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleDeleteClick}
+      />
     </>
   );
 }
