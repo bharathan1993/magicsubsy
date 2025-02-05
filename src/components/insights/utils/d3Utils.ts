@@ -16,7 +16,10 @@ export const setupD3Chart = (
     .attr("class", "text-muted-foreground text-xs")
     .call(d3.axisBottom(xScale)
       .ticks(5)
-      .tickFormat(d => d.toLocaleDateString()));
+      .tickFormat((d) => {
+        const date = d as Date;
+        return date.toLocaleDateString();
+      }));
 
   svg.append("g")
     .attr("class", "text-muted-foreground text-xs")
