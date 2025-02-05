@@ -8,15 +8,15 @@ export const useSpendingData = (userId: string | undefined) => {
     queryFn: async () => {
       if (!userId) return [];
       
-      // Calculate date 30 days ago
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Calculate date 90 days ago
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
       
       const { data: subscriptions, error } = await supabase
         .from('subscriptions')
         .select('amount, activation_date')
         .eq('user_id', userId)
-        .gte('activation_date', thirtyDaysAgo.toISOString().split('T')[0])
+        .gte('activation_date', ninetyDaysAgo.toISOString().split('T')[0])
         .order('activation_date', { ascending: true });
       
       if (error) {
