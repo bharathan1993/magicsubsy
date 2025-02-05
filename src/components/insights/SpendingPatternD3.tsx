@@ -21,9 +21,9 @@ export function SpendingPatternD3() {
     d3.select(svgRef.current).selectAll("*").remove();
 
     const dimensions: ChartDimensions = {
-      margin: { top: 20, right: 30, bottom: 30, left: 60 },
-      width: svgRef.current.clientWidth - 60 - 30, // margin.left + margin.right
-      height: 300 - 20 - 30 // margin.top + margin.bottom
+      margin: { top: 40, right: 50, bottom: 40, left: 80 },
+      width: svgRef.current.clientWidth - 80 - 50, // margin.left + margin.right
+      height: 420 - 40 - 40 // margin.top + margin.bottom
     };
 
     // Create SVG
@@ -33,14 +33,16 @@ export function SpendingPatternD3() {
       .append("g")
       .attr("transform", `translate(${dimensions.margin.left},${dimensions.margin.top})`);
 
-    // Set scales
+    // Set scales with more padding
     const xScale = d3.scaleTime()
       .domain(d3.extent(spendingData, d => d.date) as [Date, Date])
-      .range([0, dimensions.width]);
+      .range([0, dimensions.width])
+      .nice(); // Add nice() to round the domain to nice values
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(spendingData, d => d.amount) as number])
-      .range([dimensions.height, 0]);
+      .range([dimensions.height, 0])
+      .nice(); // Add nice() to round the domain to nice values
 
     // Setup basic chart elements
     setupD3Chart(svg, dimensions.width, dimensions.height, spendingData, xScale, yScale, formatAmount);
@@ -97,7 +99,7 @@ export function SpendingPatternD3() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="h-[300px] w-full">
+        <div className="h-[420px] w-full">
           <svg ref={svgRef} className="w-full h-full" />
         </div>
       </CardContent>
