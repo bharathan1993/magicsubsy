@@ -32,7 +32,7 @@ export const createLine = (
     .curve(d3.curveMonotoneX);
 };
 
-// Helper function to adjust overlapping points
+// Helper function to adjust overlapping points with improved spacing
 const adjustOverlappingPoints = (data: SpendingData[], xScale: d3.ScaleTime<number, number>) => {
   const dateGroups = new Map<string, SpendingData[]>();
   
@@ -50,8 +50,8 @@ const adjustOverlappingPoints = (data: SpendingData[], xScale: d3.ScaleTime<numb
     const group = dateGroups.get(dateKey) || [];
     if (group.length > 1) {
       const index = group.indexOf(d);
-      // Increased offset to 30px and adjusted calculation for better spacing
-      const offset = (index - (group.length - 1) / 2) * 30;
+      // Increased offset to 50px and adjusted calculation for better spacing
+      const offset = (index - (group.length - 1) / 2) * 50;
       return { ...d, xOffset: offset };
     }
     return { ...d, xOffset: 0 };
@@ -86,14 +86,14 @@ export const addDataPoints = (
     .attr("fill", "hsl(var(--primary))")
     .style("opacity", 1);
 
-  // Add value labels with adjusted positions
+  // Add value labels with adjusted positions and increased spacing
   svg.selectAll(".value-label")
     .data(adjustedData)
     .enter()
     .append("text")
     .attr("class", "value-label text-xs text-muted-foreground")
     .attr("x", d => xScale(d.date) + (d as any).xOffset)
-    .attr("y", d => yScale(d.amount) - 10)
+    .attr("y", d => yScale(d.amount) - 15) // Increased vertical spacing
     .attr("text-anchor", "middle")
     .text(d => formatAmount(d.amount));
 
