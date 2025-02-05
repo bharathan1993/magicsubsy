@@ -4,6 +4,7 @@ import { CategoryDistribution } from "@/components/insights/CategoryDistribution
 import { MonthlyChanges } from "@/components/insights/MonthlyChanges";
 import { Recommendations } from "@/components/insights/Recommendations";
 import { SpendingPatternD3 } from "@/components/insights/SpendingPatternD3";
+import { SpendingInsights } from "@/components/insights/SpendingInsights";
 
 export default function Insights() {
   return (
@@ -16,9 +17,14 @@ export default function Insights() {
       </div>
       
       <div className="grid gap-2 grid-cols-1">
-        {/* First row - full width for spending pattern */}
-        <div className="h-[500px]">
-          <SpendingPatternD3 />
+        {/* First row - spending pattern with insights */}
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-3">
+          <div className="md:col-span-2 h-[500px]">
+            <SpendingPatternD3 />
+          </div>
+          <div className="h-[500px]">
+            <SpendingInsights />
+          </div>
         </div>
 
         {/* Second row */}
