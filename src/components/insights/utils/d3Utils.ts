@@ -14,12 +14,28 @@ export const setupD3Chart = (
   svg.append("g")
     .attr("transform", `translate(0,${height})`)
     .attr("class", "text-muted-foreground text-xs")
-    .call(d3.axisBottom(xScale));
+    .call(d3.axisBottom(xScale)
+      .ticks(5)
+      .tickFormat(d => d.toLocaleDateString()));
 
   svg.append("g")
     .attr("class", "text-muted-foreground text-xs")
     .call(d3.axisLeft(yScale)
       .tickFormat(d => formatAmount(d as number)));
+
+  // Add grid lines
+  svg.append("g")
+    .attr("class", "grid opacity-20")
+    .selectAll("line")
+    .data(yScale.ticks())
+    .enter()
+    .append("line")
+    .attr("x1", 0)
+    .attr("x2", width)
+    .attr("y1", d => yScale(d))
+    .attr("y2", d => yScale(d))
+    .attr("stroke", "currentColor")
+    .attr("stroke-dasharray", "2,2");
 };
 
 export const createLine = (
@@ -30,34 +46,6 @@ export const createLine = (
     .x(d => xScale(d.date))
     .y(d => yScale(d.amount))
     .curve(d3.curveMonotoneX);
-};
-
-// Helper function to adjust overlapping points with improved spacing
-const adjustOverlappingPoints = (data: SpendingData[], xScale: d3.ScaleTime<number, number>) => {
-  const dateGroups = new Map<string, SpendingData[]>();
-  
-  // Group points by date
-  data.forEach(d => {
-    const dateKey = d.date.toISOString().split('T')[0];
-    const existing = dateGroups.get(dateKey) || [];
-    existing.push(d);
-    dateGroups.set(dateKey, existing);
-  });
-
-  // Calculate offsets for overlapping points with increased spacing
-  const offsetData = data.map(d => {
-    const dateKey = d.date.toISOString().split('T')[0];
-    const group = dateGroups.get(dateKey) || [];
-    if (group.length > 1) {
-      const index = group.indexOf(d);
-      // Increased offset to 50px and adjusted calculation for better spacing
-      const offset = (index - (group.length - 1) / 2) * 50;
-      return { ...d, xOffset: offset };
-    }
-    return { ...d, xOffset: 0 };
-  });
-
-  return offsetData;
 };
 
 export const addDataPoints = (
@@ -71,35 +59,32 @@ export const addDataPoints = (
     .append("div")
     .attr("class", "absolute hidden bg-background border border-border rounded-md p-2 text-xs shadow-lg");
 
-  // Adjust positions for overlapping points
-  const adjustedData = adjustOverlappingPoints(data, xScale);
-
-  // Add dots with adjusted positions
-  const dots = svg.selectAll(".dot")
-    .data(adjustedData)
+  // Add dots
+  svg.selectAll(".dot")
+    .data(data)
     .enter()
     .append("circle")
     .attr("class", "dot")
-    .attr("cx", d => xScale(d.date) + (d as any).xOffset)
+    .attr("cx", d => xScale(d.date))
     .attr("cy", d => yScale(d.amount))
     .attr("r", 4)
     .attr("fill", "hsl(var(--primary))")
     .style("opacity", 1);
 
-  // Add value labels with adjusted positions and increased spacing
+  // Add value labels
   svg.selectAll(".value-label")
-    .data(adjustedData)
+    .data(data)
     .enter()
     .append("text")
     .attr("class", "value-label text-xs text-muted-foreground")
-    .attr("x", d => xScale(d.date) + (d as any).xOffset)
-    .attr("y", d => yScale(d.amount) - 15) // Increased vertical spacing
+    .attr("x", d => xScale(d.date))
+    .attr("y", d => yScale(d.amount) - 15)
     .attr("text-anchor", "middle")
     .text(d => formatAmount(d.amount));
 
-  // Enhanced hover effects with adjusted positions
+  // Enhanced hover effects
   svg.selectAll("circle")
-    .on("mouseover", function(event, d: SpendingData & { xOffset: number }) {
+    .on("mouseover", function(event, d: SpendingData) {
       d3.select(this)
         .transition()
         .duration(200)
