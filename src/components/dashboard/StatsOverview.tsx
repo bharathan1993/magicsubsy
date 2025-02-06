@@ -11,8 +11,11 @@ interface StatsOverviewProps {
 export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProps) {
   // Function to check if a subscription is expired
   const isSubscriptionExpired = (subscription: Subscription): boolean => {
-    // Convert next_billing_date to Date object
+    // Convert next_billing_date to Date object and set time to end of day
     const billingDate = new Date(subscription.next_billing_date);
+    billingDate.setHours(23, 59, 59, 999);
+    
+    // Get today's date and set time to beginning of day for fair comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
