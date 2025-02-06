@@ -1,0 +1,72 @@
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus, List, CalendarX, Settings2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { NewSubscriptionDialog } from "./NewSubscriptionDialog";
+import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
+import { AutoCancelSettingsDialog } from "./AutoCancelSettingsDialog";
+
+export function QuickActions() {
+  const [showNewSubscriptionDialog, setShowNewSubscriptionDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showAutoCancelDialog, setShowAutoCancelDialog] = useState(false);
+  const navigate = useNavigate();
+
+  return (
+    <Card className="p-6">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold">Quick Actions</h3>
+        <p className="text-sm text-muted-foreground">
+          Manage your subscriptions with ease
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Button 
+          className="w-full justify-start" 
+          variant="default"
+          onClick={() => setShowNewSubscriptionDialog(true)}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add New Subscription
+        </Button>
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => navigate('/app/subscriptions')}
+        >
+          <List className="mr-2 h-4 w-4" /> Manage Subscriptions
+        </Button>
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => setShowCancelDialog(true)}
+        >
+          <CalendarX className="mr-2 h-4 w-4" /> Cancel a Subscription
+        </Button>
+        <Button 
+          className="w-full justify-start" 
+          variant="outline"
+          onClick={() => setShowAutoCancelDialog(true)}
+        >
+          <Settings2 className="mr-2 h-4 w-4" /> Auto-Cancel Settings
+        </Button>
+      </div>
+
+      <NewSubscriptionDialog 
+        open={showNewSubscriptionDialog} 
+        onOpenChange={setShowNewSubscriptionDialog}
+      />
+
+      <CancelSubscriptionDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+      />
+
+      <AutoCancelSettingsDialog
+        open={showAutoCancelDialog}
+        onOpenChange={setShowAutoCancelDialog}
+      />
+    </Card>
+  );
+}
