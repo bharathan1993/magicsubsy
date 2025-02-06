@@ -34,9 +34,6 @@ export default function Subscriptions() {
         throw error;
       }
       
-<<<<<<< HEAD
-      console.log('Fetched subscriptions:', data);
-=======
       console.log('Raw subscriptions data:', data?.map(sub => ({
         name: sub.name,
         status: sub.status,
@@ -44,7 +41,6 @@ export default function Subscriptions() {
         billing_cycle: sub.billing_cycle
       })));
       
->>>>>>> master
       return data as Subscription[];
     }
   });
