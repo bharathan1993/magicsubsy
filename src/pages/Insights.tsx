@@ -18,8 +18,13 @@ export default function Insights() {
       
       <div className="grid gap-2 grid-cols-1">
         {/* First row - spending pattern with insights */}
+<<<<<<< HEAD
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-3">
+          <div className="md:col-span-2 h-[500px]">
+=======
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           <div className="h-[500px]">
+>>>>>>> master
             <SpendingPatternD3 />
           </div>
           <div className="h-[500px]">

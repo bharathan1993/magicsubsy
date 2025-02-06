@@ -36,6 +36,9 @@ export function SubscriptionTable({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const billingDate = new Date(nextBillingDate);
+<<<<<<< HEAD
+    return billingDate < today;
+=======
     const isExpired = billingDate < today;
     
     console.log('Checking expiration:', {
@@ -45,17 +48,25 @@ export function SubscriptionTable({
     });
     
     return isExpired;
+>>>>>>> master
   };
 
   // Update subscription statuses based on next billing date
   useEffect(() => {
     const updateExpiredSubscriptions = async () => {
+<<<<<<< HEAD
+=======
       console.log('Starting subscription status update check...');
       
+>>>>>>> master
       for (const subscription of subscriptions) {
         const isExpired = isSubscriptionExpired(subscription.next_billing_date);
         const newStatus = isExpired ? 'expired' : 'active';
         
+<<<<<<< HEAD
+        if (subscription.status !== newStatus) {
+          try {
+=======
         console.log(`Checking subscription ${subscription.name}:`, {
           current_status: subscription.status,
           new_status: newStatus,
@@ -66,25 +77,34 @@ export function SubscriptionTable({
         if (subscription.status !== newStatus) {
           try {
             console.log(`Updating subscription ${subscription.name} status to ${newStatus}`);
+>>>>>>> master
             const { error } = await supabase
               .from('subscriptions')
               .update({ status: newStatus })
               .eq('id', subscription.id)
               .eq('user_id', session?.user?.id);
 
+<<<<<<< HEAD
+            if (error) throw error;
+=======
             if (error) {
               console.error('Error updating subscription status:', error);
               throw error;
             }
             
             console.log(`Successfully updated subscription ${subscription.name} status`);
+>>>>>>> master
           } catch (error) {
             console.error('Error updating subscription status:', error);
           }
         }
       }
+<<<<<<< HEAD
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+=======
       
       await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+>>>>>>> master
     };
 
     updateExpiredSubscriptions();
