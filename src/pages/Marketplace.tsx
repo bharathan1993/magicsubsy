@@ -66,7 +66,11 @@ export default function Marketplace() {
 
   return (
     <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+<<<<<<< HEAD
       <div className="text-center space-y-4">
+=======
+      <div className="text-center space-y-4 mb-8">
+>>>>>>> master
         <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
           Subscription Marketplace
         </h1>
@@ -75,7 +79,11 @@ export default function Marketplace() {
         </p>
       </div>
 
+<<<<<<< HEAD
       <div className="flex gap-2 justify-center flex-wrap">
+=======
+      <div className="flex gap-2 justify-center flex-wrap mb-8">
+>>>>>>> master
         {categories.map((category) => (
           <Button
             key={category}

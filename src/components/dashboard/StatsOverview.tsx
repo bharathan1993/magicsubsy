@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 
 import { CreditCard, DollarSign, CheckCircle, CalendarX } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import type { Subscription } from "@/types/subscription";
+=======
+import { CreditCard, DollarSign, CheckCircle, CalendarX } from "lucide-react";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import type { Subscription } from "@/types/subscription";
+import { useEffect, useMemo } from "react";
+>>>>>>> master
 
 interface StatsOverviewProps {
   subscriptions: Subscription[];
@@ -9,6 +16,7 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProps) {
+<<<<<<< HEAD
   // Function to check if a subscription is expired
   const isSubscriptionExpired = (subscription: Subscription): boolean => {
     // Convert next_billing_date to Date object and set time to end of day
@@ -27,6 +35,25 @@ export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProp
     console.log(`Checking subscription ${subscription.name}:`, {
       billingDate: billingDate.toISOString(),
       today: today.toISOString(),
+=======
+  // Add useEffect to log when component receives new data
+  useEffect(() => {
+    console.log('StatsOverview received new data:', {
+      total: subscriptions.length,
+      subscriptions: subscriptions.map(sub => ({
+        name: sub.name,
+        status: sub.status
+      }))
+    });
+  }, [subscriptions]);
+
+  // Function to check if a subscription is expired
+  const isSubscriptionExpired = (subscription: Subscription): boolean => {
+    const isExpired = subscription.status === 'expired';
+    
+    console.log(`Checking subscription ${subscription.name}:`, {
+      name: subscription.name,
+>>>>>>> master
       status: subscription.status,
       isExpired
     });
@@ -34,6 +61,7 @@ export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProp
     return isExpired;
   };
 
+<<<<<<< HEAD
   // Filter subscriptions based on their expiration status
   const expiredSubscriptions = subscriptions.filter(isSubscriptionExpired);
   const expiredCount = expiredSubscriptions.length;
@@ -45,6 +73,26 @@ export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProp
   console.log('All subscriptions:', subscriptions);
   console.log('Expired subscriptions:', expiredSubscriptions);
   console.log('Active subscriptions:', activeSubscriptions);
+=======
+  // Memoize the filtered subscriptions to prevent unnecessary recalculations
+  const { expiredSubscriptions, activeSubscriptions } = useMemo(() => {
+    const expired = subscriptions.filter(isSubscriptionExpired);
+    const active = subscriptions.filter(sub => !isSubscriptionExpired(sub));
+    
+    console.log('Calculated subscription counts:', {
+      total: subscriptions.length,
+      expired: expired.length,
+      active: active.length,
+      expiredList: expired.map(sub => sub.name),
+      activeList: active.map(sub => sub.name)
+    });
+
+    return { expiredSubscriptions: expired, activeSubscriptions: active };
+  }, [subscriptions]);
+
+  const expiredCount = expiredSubscriptions.length;
+  const activeCount = activeSubscriptions.length;
+>>>>>>> master
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

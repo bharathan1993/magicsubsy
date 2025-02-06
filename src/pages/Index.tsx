@@ -5,17 +5,32 @@ import { CategoryDistribution } from "@/components/dashboard/CategoryDistributio
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { WelcomeHandler } from "@/components/dashboard/WelcomeHandler";
 import { supabase } from "@/integrations/supabase/client";
+<<<<<<< HEAD
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+=======
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+>>>>>>> master
 
 export default function Index() {
   const { session } = useAuth();
   const userId = session?.user?.id;
+<<<<<<< HEAD
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['subscriptions', userId],
     queryFn: async () => {
       console.log('Fetching subscriptions...');
+=======
+  const queryClient = useQueryClient();
+
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ['subscriptions'],
+    queryFn: async () => {
+      console.log('Fetching subscriptions for dashboard...');
+>>>>>>> master
       if (!userId) return [];
       
       const { data, error } = await supabase
@@ -29,12 +44,27 @@ export default function Index() {
         throw error;
       }
       
+<<<<<<< HEAD
       console.log('Fetched subscriptions:', data);
       return data || [];
     },
     enabled: !!userId // Only run query when userId is available
   });
 
+=======
+      console.log('Raw dashboard data:', data);
+      return data || [];
+    },
+    enabled: !!userId,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
+  });
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+  }, [queryClient]);
+
+>>>>>>> master
   const totalMonthly = subscriptions.reduce((acc, sub) => {
     let monthlyAmount = sub.amount;
     if (sub.billing_cycle === "quarterly") monthlyAmount = sub.amount / 3;
