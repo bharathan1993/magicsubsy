@@ -18,8 +18,17 @@ export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProp
     
     // A subscription is expired if:
     // 1. Its status is explicitly 'expired' OR
-    // 2. Its next billing date is in the past AND status isn't active
-    return subscription.status === 'expired' || (billingDate < today && subscription.status !== 'active');
+    // 2. Its next billing date is in the past
+    const isExpired = subscription.status === 'expired' || billingDate < today;
+    
+    console.log(`Checking subscription ${subscription.name}:`, {
+      billingDate: billingDate.toISOString(),
+      today: today.toISOString(),
+      status: subscription.status,
+      isExpired
+    });
+    
+    return isExpired;
   };
 
   // Filter subscriptions based on their expiration status
