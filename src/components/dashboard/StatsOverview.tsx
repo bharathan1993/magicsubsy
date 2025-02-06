@@ -10,24 +10,27 @@ interface StatsOverviewProps {
 
 export function StatsOverview({ subscriptions, totalMonthly }: StatsOverviewProps) {
   // Function to check if a subscription is expired
-  const isSubscriptionExpired = (nextBillingDate: string): boolean => {
+  const isSubscriptionExpired = (subscription: Subscription): boolean => {
+    // Convert next_billing_date to Date object
+    const billingDate = new Date(subscription.next_billing_date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const billingDate = new Date(nextBillingDate);
-    return billingDate < today;
+    
+    // A subscription is expired if:
+    // 1. Its status is explicitly 'expired' OR
+    // 2. Its next billing date is in the past
+    return subscription.status === 'expired' || billingDate < today;
   };
 
   // Filter subscriptions based on their expiration status
-  const expiredCount = subscriptions.filter(sub => 
-    sub.status === 'expired' || isSubscriptionExpired(sub.next_billing_date)
-  ).length;
+  const expiredSubscriptions = subscriptions.filter(isSubscriptionExpired);
+  const expiredCount = expiredSubscriptions.length;
   
-  const activeCount = subscriptions.filter(sub => 
-    sub.status === 'active' && !isSubscriptionExpired(sub.next_billing_date)
-  ).length;
+  const activeSubscriptions = subscriptions.filter(sub => !isSubscriptionExpired(sub));
+  const activeCount = activeSubscriptions.length;
 
-  console.log('Active subscriptions:', activeCount);
-  console.log('Expired subscriptions:', expiredCount);
+  console.log('Expired subscriptions:', expiredSubscriptions);
+  console.log('Active subscriptions:', activeSubscriptions);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
