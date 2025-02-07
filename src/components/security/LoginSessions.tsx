@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Monitor, Smartphone, Laptop, X } from "lucide-react";
@@ -35,25 +36,39 @@ export function LoginSessions() {
         const deviceType = /Mobile|Android|iPhone/i.test(userAgent) ? 'mobile' : 
                          /iPad|Tablet/i.test(userAgent) ? 'tablet' : 'desktop';
         
-        // Get IP address and location info
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const { ip } = await ipResponse.json();
-        
-        // Get location info from IP
-        const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`);
-        const locationData = await locationResponse.json();
-        
-        const formattedSessions: Session[] = [{
-          id: authSessions?.id ?? 'current',
-          device_type: deviceType,
-          browser: getBrowserInfo(userAgent),
-          ip_address: ip,
-          location: `${locationData.city}, ${locationData.country_name}`,
-          last_active: new Date().toISOString(),
-          is_current: true
-        }];
+        // Get IP address and location info using free API
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const { ip } = await ipResponse.json();
+          
+          // Get location info from IP
+          const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+          const locationData = await locationResponse.json();
+          
+          const formattedSessions: Session[] = [{
+            id: authSessions?.session?.id ?? 'current',
+            device_type: deviceType,
+            browser: getBrowserInfo(userAgent),
+            ip_address: ip,
+            location: `${locationData.city}, ${locationData.country_name}`,
+            last_active: new Date().toISOString(),
+            is_current: true
+          }];
 
-        setSessions(formattedSessions);
+          setSessions(formattedSessions);
+        } catch (apiError) {
+          // Fallback if IP/location APIs fail
+          const formattedSessions: Session[] = [{
+            id: authSessions?.session?.id ?? 'current',
+            device_type: deviceType,
+            browser: getBrowserInfo(userAgent),
+            ip_address: 'Unknown',
+            location: 'Unknown',
+            last_active: new Date().toISOString(),
+            is_current: true
+          }];
+          setSessions(formattedSessions);
+        }
       } catch (error) {
         console.error('Error fetching sessions:', error);
         toast({
