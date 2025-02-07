@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,14 +51,15 @@ export function SignInDialog({
 
       if (authError) throw authError;
 
-      // Then check if user has 2FA enabled
+      // Then check if user has 2FA enabled, using maybeSingle() to handle no rows
       const { data: twoFactorData, error: twoFactorError } = await supabase
         .from("two_factor_auth")
         .select("is_enabled")
         .eq("user_id", authData.user.id)
-        .single();
+        .maybeSingle();
 
-      if (twoFactorError && !twoFactorError.message.includes("No rows found")) {
+      // Only throw error if it's not a "no rows" error
+      if (twoFactorError && !twoFactorError.message.includes("no rows")) {
         throw twoFactorError;
       }
 
@@ -350,3 +352,4 @@ export function SignInDialog({
     </>
   );
 }
+

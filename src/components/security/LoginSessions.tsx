@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Monitor, Smartphone, Laptop, X } from "lucide-react";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Session as SupabaseSession } from "@supabase/supabase-js";
 
 interface Session {
   sessionId: string;
@@ -28,7 +28,7 @@ export function LoginSessions() {
         if (!currentSession?.user?.id) return;
 
         // Get auth sessions from Supabase
-        const { data: authSessions, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
 
         // Get device info
@@ -46,7 +46,7 @@ export function LoginSessions() {
           const locationData = await locationResponse.json();
           
           const formattedSessions: Session[] = [{
-            sessionId: authSessions?.session?.id ?? 'current',
+            sessionId: session?.id ?? 'current',
             device_type: deviceType,
             browser: getBrowserInfo(userAgent),
             ip_address: ip,
@@ -59,7 +59,7 @@ export function LoginSessions() {
         } catch (apiError) {
           // Fallback if IP/location APIs fail
           const formattedSessions: Session[] = [{
-            sessionId: authSessions?.session?.id ?? 'current',
+            sessionId: session?.id ?? 'current',
             device_type: deviceType,
             browser: getBrowserInfo(userAgent),
             ip_address: 'Unknown',
