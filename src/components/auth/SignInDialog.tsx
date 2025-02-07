@@ -42,17 +42,6 @@ export function SignInDialog({
     setLoading(true);
     
     try {
-      // First check if user has 2FA enabled
-      const { data: twoFactorData, error: twoFactorError } = await supabase
-        .from("two_factor_auth")
-        .select("is_enabled")
-        .eq("User Name", email)
-        .single();
-
-      if (twoFactorError && !twoFactorError.message.includes("No rows found")) {
-        throw twoFactorError;
-      }
-
       // First authenticate with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -60,6 +49,17 @@ export function SignInDialog({
       });
 
       if (authError) throw authError;
+
+      // Then check if user has 2FA enabled
+      const { data: twoFactorData, error: twoFactorError } = await supabase
+        .from("two_factor_auth")
+        .select("is_enabled")
+        .eq("user_id", authData.user.id)
+        .single();
+
+      if (twoFactorError && !twoFactorError.message.includes("No rows found")) {
+        throw twoFactorError;
+      }
 
       // If 2FA is enabled, redirect to verification page
       if (twoFactorData?.is_enabled) {
@@ -79,29 +79,18 @@ export function SignInDialog({
       // Get IP address
       const ipAddress = await getIpAddress();
       
-      console.log('Recording login with:', {
-        user_id: authData.user.id,
-        login_timestamp: new Date().toISOString(),
-        device_info: deviceInfo,
-        ip_address: ipAddress
-      });
-
-      // Record login history with explicit error logging
-      const { data: loginData, error: loginError } = await supabase
+      // Record login history
+      const { error: loginError } = await supabase
         .from('login_history')
         .insert({
           user_id: authData.user.id,
           login_timestamp: new Date().toISOString(),
           device_info: JSON.stringify(deviceInfo),
           ip_address: ipAddress
-        })
-        .select();  // Add select() to get response data
+        });
 
       if (loginError) {
         console.error('Error recording login history:', loginError);
-        // Continue with sign in even if login history fails
-      } else {
-        console.log('Login history recorded successfully:', loginData);
       }
 
       // Check if user exists in User Accounts table

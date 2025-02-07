@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Session {
-  id: string;
+  sessionId: string;
   device_type: string;
   browser: string;
   ip_address: string;
@@ -46,7 +46,7 @@ export function LoginSessions() {
           const locationData = await locationResponse.json();
           
           const formattedSessions: Session[] = [{
-            id: authSessions?.session?.id ?? 'current',
+            sessionId: authSessions?.session?.id ?? 'current',
             device_type: deviceType,
             browser: getBrowserInfo(userAgent),
             ip_address: ip,
@@ -59,7 +59,7 @@ export function LoginSessions() {
         } catch (apiError) {
           // Fallback if IP/location APIs fail
           const formattedSessions: Session[] = [{
-            id: authSessions?.session?.id ?? 'current',
+            sessionId: authSessions?.session?.id ?? 'current',
             device_type: deviceType,
             browser: getBrowserInfo(userAgent),
             ip_address: 'Unknown',
@@ -83,29 +83,12 @@ export function LoginSessions() {
   }, [currentSession?.user?.id, toast]);
 
   const getBrowserInfo = (userAgent: string): string => {
-    const browsers = {
-      chrome: /chrome/i,
-      safari: /safari/i,
-      firefox: /firefox/i,
-      edge: /edge/i,
-      opera: /opera/i
-    };
-
-    for (const [name, regex] of Object.entries(browsers)) {
-      if (regex.test(userAgent)) return name.charAt(0).toUpperCase() + name.slice(1);
-    }
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Safari')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    if (userAgent.includes('Opera')) return 'Opera';
     return 'Unknown Browser';
-  };
-
-  const getDeviceIcon = (deviceType: string) => {
-    switch (deviceType.toLowerCase()) {
-      case 'mobile':
-        return <Smartphone className="h-4 w-4" />;
-      case 'tablet':
-        return <Monitor className="h-4 w-4" />;
-      default:
-        return <Laptop className="h-4 w-4" />;
-    }
   };
 
   const formatLastActive = (date: string) => {
@@ -124,7 +107,7 @@ export function LoginSessions() {
 
       // End specific session
       await supabase.auth.signOut({ scope: 'others' });
-      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      setSessions(prev => prev.filter(s => s.sessionId !== sessionId));
       
       toast({
         title: "Success",
@@ -140,6 +123,17 @@ export function LoginSessions() {
     }
   };
 
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType.toLowerCase()) {
+      case 'mobile':
+        return <Smartphone className="h-4 w-4" />;
+      case 'tablet':
+        return <Monitor className="h-4 w-4" />;
+      default:
+        return <Laptop className="h-4 w-4" />;
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -151,7 +145,7 @@ export function LoginSessions() {
       <CardContent className="space-y-4">
         {sessions.map((session) => (
           <div
-            key={session.id}
+            key={session.sessionId}
             className="flex items-center justify-between p-4 border rounded-lg"
           >
             <div className="flex items-center gap-4">
@@ -175,7 +169,7 @@ export function LoginSessions() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleEndSession(session.id)}
+              onClick={() => handleEndSession(session.sessionId)}
               className="text-muted-foreground hover:text-destructive"
             >
               <X className="h-4 w-4" />
