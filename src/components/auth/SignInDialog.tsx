@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { CelebrationPopup } from "./CelebrationPopup";
+import { useNavigate } from "react-router-dom";
 
 interface SignInDialogProps {
   open: boolean;
@@ -34,12 +35,24 @@ export function SignInDialog({
   const [loading, setLoading] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
+      // First check if user has 2FA enabled
+      const { data: twoFactorData, error: twoFactorError } = await supabase
+        .from("two_factor_auth")
+        .select("is_enabled")
+        .eq("User Name", email)
+        .single();
+
+      if (twoFactorError && !twoFactorError.message.includes("No rows found")) {
+        throw twoFactorError;
+      }
+
       // First authenticate with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -47,6 +60,12 @@ export function SignInDialog({
       });
 
       if (authError) throw authError;
+
+      // If 2FA is enabled, redirect to verification page
+      if (twoFactorData?.is_enabled) {
+        navigate('/two-factor-verification', { state: { from: window.location.pathname } });
+        return;
+      }
 
       // Get device and browser info
       const userAgent = navigator.userAgent;

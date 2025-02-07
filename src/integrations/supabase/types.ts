@@ -147,6 +147,33 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_verification: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          otp_code: string
+          user_id: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          otp_code: string
+          user_id?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          otp_code?: string
+          user_id?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -231,6 +258,39 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      two_factor_auth: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          phone_number: string
+          updated_at: string | null
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          phone_number: string
+          updated_at?: string | null
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          phone_number?: string
+          updated_at?: string | null
+          user_id?: string | null
+          verified_at?: string | null
         }
         Relationships: []
       }
