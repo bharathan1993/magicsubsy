@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Star, Tag, Clock, Shield } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { DeveloperAppForm } from "@/components/marketplace/DeveloperAppForm";
 
 // Mock data for marketplace listings
 const marketplaceListings = [
@@ -73,6 +74,9 @@ export default function Marketplace() {
         <p className="text-gray-600 max-w-2xl mx-auto">
           Discover and subscribe to premium services at exclusive discounts
         </p>
+        <div className="flex justify-center mt-4">
+          <DeveloperAppForm />
+        </div>
       </div>
 
       <div className="flex gap-2 justify-center flex-wrap mb-8">
