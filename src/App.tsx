@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "./components/theme/theme-provider";
+import { ThemeToggle } from "./components/theme/theme-toggle";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -44,57 +46,62 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <CurrencyProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              {/* Redirect root to landing page */}
-              <Route path="/" element={<Navigate to="/landing" replace />} />
-              <Route path="/landing" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/two-factor-verification" element={<TwoFactorVerification />} />
-              
-              {/* Protected app routes with sidebar layout */}
-              <Route
-                path="/app/*"
-                element={
-                  <ProtectedRoute>
-                    <SidebarProvider>
-                      <div className="flex min-h-screen w-full">
-                        <AppSidebar />
-                        <main className="flex-1 p-6">
-                          <div className="flex justify-end mb-6">
-                            <AccountButton />
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <CurrencyProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                {/* Redirect root to landing page */}
+                <Route path="/" element={<Navigate to="/landing" replace />} />
+                <Route path="/landing" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/two-factor-verification" element={<TwoFactorVerification />} />
+                
+                {/* Protected app routes with sidebar layout */}
+                <Route
+                  path="/app/*"
+                  element={
+                    <ProtectedRoute>
+                      <SidebarProvider>
+                        <div className="flex min-h-screen w-full">
+                          <AppSidebar />
+                          <main className="flex-1 p-6">
+                            <div className="flex justify-end mb-6">
+                              <AccountButton />
+                            </div>
+                            <Routes>
+                              <Route index element={<Index />} />
+                              <Route path="subscriptions" element={<Subscriptions />} />
+                              <Route path="marketplace" element={<Marketplace />} />
+                              <Route path="insights" element={<Insights />} />
+                              <Route path="alerts" element={<Alerts />} />
+                              <Route path="settings" element={<Settings />} />
+                              <Route path="budget-goals" element={<BudgetGoals />} />
+                              <Route path="subscription-sharing" element={<SubscriptionSharing />} />
+                              <Route path="compare-services" element={<CompareServices />} />
+                              <Route path="account" element={<Account />} />
+                              <Route path="security" element={<Security />} />
+                              <Route path="billing" element={<Billing />} />
+                              <Route path="reports" element={<Reports />} />
+                            </Routes>
+                          </main>
+                          <div className="fixed bottom-4 left-4 z-50">
+                            <ThemeToggle />
                           </div>
-                          <Routes>
-                            <Route index element={<Index />} />
-                            <Route path="subscriptions" element={<Subscriptions />} />
-                            <Route path="marketplace" element={<Marketplace />} />
-                            <Route path="insights" element={<Insights />} />
-                            <Route path="alerts" element={<Alerts />} />
-                            <Route path="settings" element={<Settings />} />
-                            <Route path="budget-goals" element={<BudgetGoals />} />
-                            <Route path="subscription-sharing" element={<SubscriptionSharing />} />
-                            <Route path="compare-services" element={<CompareServices />} />
-                            <Route path="account" element={<Account />} />
-                            <Route path="security" element={<Security />} />
-                            <Route path="billing" element={<Billing />} />
-                            <Route path="reports" element={<Reports />} />
-                          </Routes>
-                        </main>
-                      </div>
-                    </SidebarProvider>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </CurrencyProvider>
+                        </div>
+                      </SidebarProvider>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CurrencyProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
