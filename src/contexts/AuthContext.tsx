@@ -93,9 +93,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           break;
           
-        case 'USER_DELETED':
-        case 'TOKEN_EXPIRED':
-          // Handle these cases by signing out
+        default:
+          // Handle any other cases by signing out
+          if (event === 'INITIAL_SESSION') {
+            // Don't sign out for initial session event
+            break;
+          }
+          console.error('Unhandled auth event:', event);
           handleSignOut();
           break;
       }
