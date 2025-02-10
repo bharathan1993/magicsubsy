@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,17 +18,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    navigate('/landing');
+    toast({
+      title: "Signed Out",
+      description: "You have been signed out successfully.",
+    });
+  };
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
       if (error) {
         console.error('Error getting session:', error);
-        toast({
-          title: "Authentication Error",
-          description: "There was a problem with your session. Please sign in again.",
-          variant: "destructive",
-        });
-        navigate('/landing');
+        // If there's an error getting the session, sign out and clear state
+        handleSignOut();
       } else {
         setSession(initialSession);
       }
@@ -51,10 +58,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           break;
           
         case 'SIGNED_IN':
-        case 'TOKEN_REFRESHED':
           setSession(currentSession);
           if (window.location.pathname === '/landing' || window.location.pathname === '/auth') {
             navigate('/app');
+          }
+          break;
+          
+        case 'TOKEN_REFRESHED':
+          if (currentSession) {
+            setSession(currentSession);
+            if (window.location.pathname === '/landing' || window.location.pathname === '/auth') {
+              navigate('/app');
+            }
+          } else {
+            // If token refresh failed, sign out
+            console.error('Token refresh failed - no session available');
+            handleSignOut();
           }
           break;
           
@@ -72,6 +91,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             title: "Password Recovery",
             description: "Please follow the instructions to reset your password.",
           });
+          break;
+          
+        case 'USER_DELETED':
+        case 'TOKEN_EXPIRED':
+          // Handle these cases by signing out
+          handleSignOut();
           break;
       }
       
