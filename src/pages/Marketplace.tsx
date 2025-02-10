@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +67,7 @@ export default function Marketplace() {
     : marketplaceListings.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="container mx-auto p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       <div className="text-center space-y-4 mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
           Subscription Marketplace
@@ -92,9 +93,9 @@ export default function Marketplace() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {filteredListings.map((listing) => (
-          <Card key={listing.id} className="group hover:shadow-lg transition-shadow duration-300">
+          <Card key={listing.id} className="flex flex-col h-full group hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="relative p-0">
               <img
                 src={listing.image}
@@ -107,7 +108,7 @@ export default function Marketplace() {
                 {listing.discount}% OFF
               </Badge>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="flex-grow p-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">{listing.name}</CardTitle>
