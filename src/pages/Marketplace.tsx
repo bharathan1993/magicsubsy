@@ -67,12 +67,12 @@ export default function Marketplace() {
     : marketplaceListings.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="container mx-auto p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div className="container mx-auto p-8 bg-background min-h-screen">
       <div className="text-center space-y-4 mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
           Subscription Marketplace
         </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <p className="text-muted-foreground max-w-2xl mx-auto">
           Discover and subscribe to premium services at exclusive discounts
         </p>
         <div className="flex justify-center mt-4">
@@ -95,7 +95,7 @@ export default function Marketplace() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {filteredListings.map((listing) => (
-          <Card key={listing.id} className="flex flex-col h-full group hover:shadow-lg transition-shadow duration-300">
+          <Card key={listing.id} className="flex flex-col h-full group hover:shadow-lg transition-shadow bg-card">
             <CardHeader className="relative p-0">
               <img
                 src={listing.image}
@@ -117,15 +117,15 @@ export default function Marketplace() {
                     <span className="text-sm font-medium">{listing.rating}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600">{listing.description}</p>
+                <p className="text-sm text-muted-foreground">{listing.description}</p>
               </div>
               
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Tag className="w-4 h-4" />
                   <span>{formatAmount(listing.price)}/month</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Shield className="w-4 h-4" />
                   <span>{listing.developer}</span>
                 </div>
@@ -135,7 +135,7 @@ export default function Marketplace() {
                 {listing.features.map((feature, index) => (
                   <div 
                     key={index}
-                    className="text-xs bg-gray-100 rounded-full px-3 py-1 text-center"
+                    className="text-xs bg-secondary rounded-full px-3 py-1 text-center text-secondary-foreground"
                   >
                     {feature}
                   </div>
