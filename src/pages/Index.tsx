@@ -1,3 +1,4 @@
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { UpcomingCharges } from "@/components/dashboard/UpcomingCharges";
@@ -51,7 +52,7 @@ export default function Index() {
   }, 0);
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-8 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <SidebarTrigger />

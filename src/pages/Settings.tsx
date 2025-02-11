@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -7,7 +8,7 @@ export default function Settings() {
   const { currentCurrency, setCurrency, currencies } = useCurrency();
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
+    <div className="flex-1 p-8 bg-background">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
