@@ -329,11 +329,13 @@ export type Database = {
           amount: number | null
           billing_cycle: string | null
           category: string | null
+          created_at: string | null
           id: string | null
           name: string | null
           next_billing_date: string | null
           status: string | null
           subscription_type: string | null
+          updated_at: string | null
           user_id: string | null
           website_url: string | null
         }
@@ -342,11 +344,13 @@ export type Database = {
           amount?: number | null
           billing_cycle?: string | null
           category?: string | null
+          created_at?: string | null
           id?: string | null
           name?: string | null
           next_billing_date?: string | null
           status?: string | null
           subscription_type?: string | null
+          updated_at?: string | null
           user_id?: string | null
           website_url?: string | null
         }
@@ -355,11 +359,13 @@ export type Database = {
           amount?: number | null
           billing_cycle?: string | null
           category?: string | null
+          created_at?: string | null
           id?: string | null
           name?: string | null
           next_billing_date?: string | null
           status?: string | null
           subscription_type?: string | null
+          updated_at?: string | null
           user_id?: string | null
           website_url?: string | null
         }
