@@ -8,16 +8,12 @@ import { WelcomeHandler } from "@/components/dashboard/WelcomeHandler";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import { NewSubscriptionDialog } from "@/components/dashboard/NewSubscriptionDialog";
+import { useEffect } from "react";
 
 export default function Index() {
   const { session } = useAuth();
   const userId = session?.user?.id;
   const queryClient = useQueryClient();
-  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
 
   const { data: subscriptions = [] } = useQuery({
     queryKey: ['subscriptions'],
@@ -55,13 +51,6 @@ export default function Index() {
     return acc + monthlyAmount;
   }, 0);
 
-  const handleNewDialogClose = (open: boolean) => {
-    setIsNewDialogOpen(open);
-    if (!open) {
-      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-    }
-  };
-
   return (
     <div className="flex-1 p-8 bg-background">
       <div className="max-w-7xl mx-auto">
@@ -77,17 +66,6 @@ export default function Index() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Upcoming Charges</h2>
-              <Button 
-                onClick={() => setIsNewDialogOpen(true)} 
-                className="bg-green-500 hover:bg-green-600"
-                size="sm"
-              >
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Add New Subscription
-              </Button>
-            </div>
             <UpcomingCharges />
           </div>
           <div>
@@ -100,11 +78,6 @@ export default function Index() {
         </div>
 
         <WelcomeHandler />
-        
-        <NewSubscriptionDialog
-          open={isNewDialogOpen}
-          onOpenChange={handleNewDialogClose}
-        />
       </div>
     </div>
   );
