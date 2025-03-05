@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +18,6 @@ import Insights from "./pages/Insights";
 import Alerts from "./pages/Alerts";
 import Settings from "./pages/Settings";
 import BudgetGoals from "./pages/BudgetGoals";
-import SubscriptionSharing from "./pages/SubscriptionSharing";
 import CompareServices from "./pages/CompareServices";
 import Account from "./pages/Account";
 import Billing from "./pages/Billing";
@@ -80,7 +80,7 @@ const App = () => (
                               <Route path="alerts" element={<Alerts />} />
                               <Route path="settings" element={<Settings />} />
                               <Route path="budget-goals" element={<BudgetGoals />} />
-                              <Route path="subscription-sharing" element={<SubscriptionSharing />} />
+                              {/* Removed Subscription Sharing route */}
                               <Route path="compare-services" element={<CompareServices />} />
                               <Route path="account" element={<Account />} />
                               <Route path="security" element={<Security />} />
