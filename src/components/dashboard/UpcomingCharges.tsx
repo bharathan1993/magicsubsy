@@ -1,15 +1,19 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { Calendar } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import { SubscriptionDetailsDialog } from "./SubscriptionDetailsDialog";
 import { Subscription } from "@/types/subscription";
+import { NewSubscriptionDialog } from "./NewSubscriptionDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function UpcomingCharges() {
   const [upcomingCharges, setUpcomingCharges] = useState<Subscription[]>([]);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isAddSubscriptionOpen, setIsAddSubscriptionOpen] = useState(false);
   const { formatAmount } = useCurrency();
 
   useEffect(() => {
@@ -30,7 +34,7 @@ export function UpcomingCharges() {
     };
 
     fetchUpcomingCharges();
-  }, []);
+  }, [isAddSubscriptionOpen]); // Refresh when dialog closes
 
   const handleSubscriptionClick = (subscription: Subscription) => {
     setSelectedSubscription(subscription);
@@ -40,8 +44,23 @@ export function UpcomingCharges() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Charges</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-xl font-bold">Upcoming Charges</CardTitle>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={() => setIsAddSubscriptionOpen(true)}
+                  className="p-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add Subscription</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -76,6 +95,11 @@ export function UpcomingCharges() {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
         subscription={selectedSubscription}
+      />
+
+      <NewSubscriptionDialog
+        open={isAddSubscriptionOpen}
+        onOpenChange={setIsAddSubscriptionOpen}
       />
     </>
   );
