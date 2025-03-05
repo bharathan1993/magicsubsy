@@ -1,3 +1,4 @@
+
 import { Table, TableBody } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,6 +102,19 @@ export function SubscriptionTable({
     }
 
     try {
+      // First, delete any auto_cancel_settings for this subscription
+      const { error: cancelSettingsError } = await supabase
+        .from('auto_cancel_settings')
+        .delete()
+        .eq('subscription_id', subscriptionToDelete)
+        .eq('user_id', session.user.id);
+      
+      if (cancelSettingsError) {
+        console.error('Error deleting auto cancel settings:', cancelSettingsError);
+        // Continue with subscription deletion even if this fails
+      }
+
+      // Now delete the subscription
       const { error } = await supabase
         .from('subscriptions')
         .delete()
