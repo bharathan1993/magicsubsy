@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -161,7 +160,6 @@ export default function CompareServices() {
   const [services, setServices] = useState<Service[]>(allServices);
 
   useEffect(() => {
-    // Filter services based on category and search query
     let filteredServices = allServices;
     
     if (selectedCategory !== "all") {
@@ -189,11 +187,9 @@ export default function CompareServices() {
     });
   };
 
-  // Get unique service objects for comparison table at the bottom
   const getComparisonServices = () => {
     if (services.length === 0) return [];
     
-    // Get one service per category for comparison, up to 3 services
     const categoryMap = new Map<string, Service>();
     services.forEach(service => {
       if (!categoryMap.has(service.category)) {
@@ -201,7 +197,6 @@ export default function CompareServices() {
       }
     });
     
-    // Convert map values to array and limit to 3
     return Array.from(categoryMap.values()).slice(0, 3);
   };
 
@@ -219,7 +214,6 @@ export default function CompareServices() {
           </p>
         </div>
 
-        {/* Filters Section */}
         <div className="grid gap-4 md:flex md:items-center md:justify-between">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-muted-foreground" />
@@ -253,7 +247,6 @@ export default function CompareServices() {
           </div>
         </div>
 
-        {/* Services Grid */}
         {services.length > 0 ? (
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {services.map((service) => (
@@ -277,8 +270,8 @@ export default function CompareServices() {
                       </div>
                     </div>
                   </CardTitle>
-                  <Badge className="text-xs mt-1 w-fit">{service.category}</Badge>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <Badge className="text-xs mt-3 w-fit">{service.category}</Badge>
+                  <p className="text-sm text-muted-foreground mt-3">
                     {service.description}
                   </p>
                 </CardHeader>
@@ -325,7 +318,6 @@ export default function CompareServices() {
           </div>
         )}
 
-        {/* Feature Comparison Table */}
         {comparisonServices.length > 0 && (
           <Card className="mt-12 bg-card/50 backdrop-blur-sm">
             <CardHeader>
