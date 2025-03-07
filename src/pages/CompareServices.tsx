@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -257,9 +258,9 @@ export default function CompareServices() {
                   </Badge>
                 </div>
                 
-                <CardHeader>
-                  <CardTitle className="flex flex-col space-y-2">
-                    <span className="text-2xl">{service.name}</span>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex flex-col space-y-3">
+                    <span className="text-2xl pt-2">{service.name}</span>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -270,13 +271,15 @@ export default function CompareServices() {
                       </div>
                     </div>
                   </CardTitle>
-                  <Badge className="text-xs mt-3 w-fit">{service.category}</Badge>
-                  <p className="text-sm text-muted-foreground mt-3">
+                  <div className="mt-4 mb-1">
+                    <Badge className="text-xs w-fit">{service.category}</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4 line-clamp-3">
                     {service.description}
                   </p>
                 </CardHeader>
                 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-4">
                   <div className="space-y-3">
                     {service.features.map((feature) => (
                       <div
@@ -286,7 +289,7 @@ export default function CompareServices() {
                         <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
                           <Check className="h-3 w-3 text-primary" />
                         </div>
-                        {feature}
+                        <span className="leading-snug">{feature}</span>
                       </div>
                     ))}
                   </div>
