@@ -259,8 +259,8 @@ export default function CompareServices() {
                 </div>
                 
                 <CardHeader className="pb-2">
-                  <CardTitle className="flex flex-col space-y-3">
-                    <span className="text-2xl pt-2">{service.name}</span>
+                  <CardTitle className="flex flex-col space-y-4">
+                    <span className="text-2xl pt-4">{service.name}</span>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -271,10 +271,10 @@ export default function CompareServices() {
                       </div>
                     </div>
                   </CardTitle>
-                  <div className="mt-4 mb-1">
+                  <div className="mt-5 mb-2">
                     <Badge className="text-xs w-fit">{service.category}</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-4 line-clamp-3">
+                  <p className="text-sm text-muted-foreground mt-6 line-clamp-3">
                     {service.description}
                   </p>
                 </CardHeader>
