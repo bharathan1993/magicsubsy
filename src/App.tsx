@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 import { AppSidebar } from "./components/layout/AppSidebar";
 import { AccountButton } from "./components/layout/AccountButton";
 import TwoFactorVerification from "./pages/TwoFactorVerification";
+import DebugAuth from "./pages/DebugAuth";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/two-factor-verification" element={<TwoFactorVerification />} />
+                <Route path="/debug-auth" element={<DebugAuth />} />
                 
                 {/* Protected app routes with sidebar layout */}
                 <Route

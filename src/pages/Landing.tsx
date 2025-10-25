@@ -8,8 +8,8 @@ import { ChatWidget } from "@/components/landing/ChatWidget";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <HeroSection />
         <FeaturesGrid />
         <StatsSection />

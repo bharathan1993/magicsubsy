@@ -106,7 +106,24 @@ export function SignInDialog({
         .single();
 
       if (dbError) {
-        throw new Error("User account not found. Please sign up first.");
+        // If user doesn't exist in User Accounts table, create the record
+        if (dbError.code === 'PGRST116') { // Record not found error
+          const { error: insertError } = await supabase
+            .from('User Accounts')
+            .insert([
+              {
+                user_id: authData.user.id,
+                "User Name": authData.user.email,
+                Password: password // Note: This is not secure, should be handled differently
+              }
+            ]);
+
+          if (insertError) {
+            throw new Error("Failed to create user account record. Please try again.");
+          }
+        } else {
+          throw new Error("Database error. Please try again.");
+        }
       }
 
       onSignInSuccess();
@@ -141,41 +158,92 @@ export function SignInDialog({
     setLoading(true);
     
     try {
-      // Check if user already exists first
-      const { data: existingUser } = await supabase
-        .from('User Accounts')
-        .select('user_id')
-        .eq('User Name', email)
-        .single();
-
-      if (existingUser) {
-        toast({
-          title: "Error",
-          description: "An account with this email already exists. Please sign in instead.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create the user in Supabase Auth
+      // First try to create the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (authError) {
-        if (authError.message.includes("already registered")) {
-          toast({
-            title: "Error",
-            description: "An account with this email already exists. Please sign in instead.",
-            variant: "destructive",
+        console.log("Auth error during signup:", authError);
+        
+        // If user already exists in Supabase Auth, check if they exist in User Accounts table
+        if (authError.message.includes("already registered") ||
+            authError.message.includes("already been registered") ||
+            authError.message.includes("User already registered") ||
+            authError.message.includes("user_already_exists") ||
+            authError.message.includes("duplicate") ||
+            authError.status === 422) {
+          console.log("Attempting to sign in existing user to verify credentials");
+          
+          // Try to get the existing user from Supabase Auth
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
           });
-          return;
+
+          console.log("Sign in attempt result:", { signInData, signInError });
+
+          if (signInData.user && !signInError) {
+            console.log("User authenticated, checking User Accounts table for user_id:", signInData.user.id);
+            
+            // Check if user exists in User Accounts table
+            const { data: existingUser, error: userCheckError } = await supabase
+              .from('User Accounts')
+              .select('user_id, "User Name"')
+              .eq('user_id', signInData.user.id)
+              .single();
+
+            console.log("User Accounts check result:", { existingUser, userCheckError });
+
+            if (existingUser) {
+              toast({
+                title: "Error",
+                description: "An account with this email already exists. Please sign in instead.",
+                variant: "destructive",
+              });
+              return;
+            } else {
+              // User exists in Auth but not in User Accounts, create the record
+              const { error: dbError } = await supabase
+                .from('User Accounts')
+                .insert([
+                  {
+                    user_id: signInData.user.id,
+                    "User Name": email,
+                    Password: password
+                  }
+                ]);
+
+              if (dbError) {
+                toast({
+                  title: "Error",
+                  description: "Account exists but failed to sync. Please try signing in.",
+                  variant: "destructive",
+                });
+                return;
+              }
+
+              toast({
+                title: "Success",
+                description: "Account synced successfully! Please sign in.",
+              });
+              return;
+            }
+          } else {
+            toast({
+              title: "Error",
+              description: "An account with this email already exists but the password is incorrect.",
+              variant: "destructive",
+            });
+            return;
+          }
         }
         throw authError;
       }
 
       if (authData.user) {
+        // New user created successfully, now create the record in User Accounts table
         const { error: dbError } = await supabase
           .from('User Accounts')
           .insert([
