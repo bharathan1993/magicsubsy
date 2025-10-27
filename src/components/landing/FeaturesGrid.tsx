@@ -1,6 +1,7 @@
-import { CreditCard, Store, PieChart, Bell, Target, Users, ArrowLeftRight, Sparkles } from "lucide-react";
+import { CreditCard, Store, PieChart, Bell, Target, Users, ArrowLeftRight, Sparkles, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { cardVariants, staggerContainerVariants, fadeInUpVariants, scaleInVariants } from "@/lib/animations";
 
 const features = [
   {
@@ -50,45 +51,37 @@ const features = [
 export function FeaturesGrid() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-
   return (
-    <section className="py-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-            Powerful Features to
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Simplify Your Life
-            </span>
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+    <section className="py-20 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50 opacity-50" />
+      
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          className="text-center mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.div variants={fadeInUpVariants}>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+              Powerful Features to
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 animate-gradient-shift bg-300%">
+                Simplify Your Life
+              </span>
+            </h2>
+          </motion.div>
+          <motion.p
+            className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto"
+            variants={fadeInUpVariants}
+          >
             Everything you need to manage, track, and optimize your subscriptions in one intelligent platform.
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
         
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          variants={containerVariants}
+          variants={staggerContainerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
@@ -96,8 +89,8 @@ export function FeaturesGrid() {
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              variants={itemVariants}
-              whileHover={{ y: -5 }}
+              variants={cardVariants}
+              whileHover="hover"
               className={`
                 group relative p-8 bg-white rounded-2xl shadow-md border border-gray-100
                 transition-all duration-300 cursor-pointer hover:shadow-xl
@@ -105,25 +98,39 @@ export function FeaturesGrid() {
               `}
               onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
             >
+              {/* Background gradient on hover */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                initial={false}
+                animate={{ opacity: expandedIndex === index ? 1 : 0 }}
+              />
+              
               {/* Icon */}
               <motion.div
                 className={`
-                  h-14 w-14 bg-gradient-to-br ${feature.color} rounded-xl
+                  relative h-14 w-14 bg-gradient-to-br ${feature.color} rounded-xl
                   flex items-center justify-center mb-6 text-white
-                  transition-transform duration-300 group-hover:scale-110
+                  transition-transform duration-300
                 `}
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {feature.icon}
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
+                >
+                  {feature.icon}
+                </motion.div>
               </motion.div>
               
               {/* Title */}
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 group-hover:text-blue-600
+              <h3 className="relative text-xl font-semibold mb-3 text-gray-900 group-hover:text-blue-600
                              transition-colors duration-300">
                 {feature.title}
               </h3>
               
               {/* Description */}
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <p className="relative text-gray-600 leading-relaxed">{feature.description}</p>
               
               {/* Expanded details */}
               <motion.div
@@ -132,10 +139,10 @@ export function FeaturesGrid() {
                   height: expandedIndex === index ? "auto" : 0,
                   opacity: expandedIndex === index ? 1 : 0
                 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="relative mt-4 pt-4 border-t border-gray-100">
                   <p className="text-sm text-gray-700 leading-relaxed">
                     {feature.details}
                   </p>
@@ -143,17 +150,30 @@ export function FeaturesGrid() {
               </motion.div>
 
               {/* Learn more indicator */}
-              <div className="flex items-center mt-4 text-blue-600 text-sm font-medium">
+              <motion.div
+                className="relative flex items-center mt-4 text-blue-600 text-sm font-medium"
+                whileHover={{ x: 5 }}
+              >
                 {expandedIndex === index ? "Show less" : "Learn more"}
                 <motion.div
                   animate={{ rotate: expandedIndex === index ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </motion.div>
-              </div>
+              </motion.div>
+
+              {/* Floating particles effect */}
+              {expandedIndex === index && (
+                <motion.div
+                  className="absolute -top-2 -right-2"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Sparkles className="h-5 w-5 text-blue-500" />
+                </motion.div>
+              )}
             </motion.div>
           ))}
         </motion.div>

@@ -13,13 +13,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SubscriptionFormFields } from "../subscription/SubscriptionFormFields";
 import { calculateNextBillingDate } from "@/utils/subscriptionUtils";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NewSubscriptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubscriptionAdded?: () => void;
 }
 
-export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDialogProps) {
+export function NewSubscriptionDialog({ open, onOpenChange, onSubscriptionAdded }: NewSubscriptionDialogProps) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [amount, setAmount] = useState("");
@@ -29,6 +31,7 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
   const [subscriptionType, setSubscriptionType] = useState("online");
   const { toast } = useToast();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +68,16 @@ export function NewSubscriptionDialog({ open, onOpenChange }: NewSubscriptionDia
       });
       
       onOpenChange(false);
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['subscriptions'] }),
+        queryClient.invalidateQueries({ queryKey: ['upcomingCharges'] }),
+      ]);
+      
+      // Notify parent component that a subscription was added
+      if (onSubscriptionAdded) {
+        onSubscriptionAdded();
+      }
       // Reset form
       setName("");
       setUrl("");

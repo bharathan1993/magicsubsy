@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -8,33 +8,46 @@ import { SubscriptionDetailsDialog } from "./SubscriptionDetailsDialog";
 import { Subscription } from "@/types/subscription";
 import { NewSubscriptionDialog } from "./NewSubscriptionDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 
 export function UpcomingCharges() {
-  const [upcomingCharges, setUpcomingCharges] = useState<Subscription[]>([]);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isAddSubscriptionOpen, setIsAddSubscriptionOpen] = useState(false);
   const { formatAmount } = useCurrency();
+  const { session } = useAuth();
+  const userId = session?.user?.id;
 
-  useEffect(() => {
-    const fetchUpcomingCharges = async () => {
+  const { data: upcomingCharges = [], isLoading, refetch } = useQuery({
+    queryKey: ['upcomingCharges', userId],
+    queryFn: async (): Promise<Subscription[]> => {
+      if (!userId) return [];
+      
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
       const { data, error } = await supabase
         .from("subscriptions")
         .select("*")
+        .eq("user_id", userId)
         .lte("next_billing_date", thirtyDaysFromNow.toISOString().split('T')[0])
         .gte("next_billing_date", new Date().toISOString().split('T')[0])
         .order("next_billing_date", { ascending: true });
 
-      if (!error && data) {
-        setUpcomingCharges(data);
+      if (error) {
+        console.error("Error fetching upcoming charges:", error);
+        throw error;
       }
-    };
 
-    fetchUpcomingCharges();
-  }, [isAddSubscriptionOpen]); // Refresh when dialog closes
+      return data ?? [];
+    },
+    enabled: !!userId,
+  });
+
+  const handleSubscriptionAdded = () => {
+    void refetch();
+  };
 
   const handleSubscriptionClick = (subscription: Subscription) => {
     setSelectedSubscription(subscription);
@@ -64,7 +77,10 @@ export function UpcomingCharges() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {upcomingCharges.map((charge) => (
+            {isLoading && (
+              <p className="text-center text-muted-foreground">Loading upcoming charges...</p>
+            )}
+            {!isLoading && upcomingCharges.map((charge) => (
               <div
                 key={charge.id}
                 className="flex items-center justify-between p-2 rounded-lg hover:bg-accent cursor-pointer"
@@ -82,7 +98,7 @@ export function UpcomingCharges() {
                 <p className="font-medium">{formatAmount(charge.amount)}</p>
               </div>
             ))}
-            {upcomingCharges.length === 0 && (
+            {!isLoading && upcomingCharges.length === 0 && (
               <p className="text-center text-muted-foreground">
                 No upcoming charges in the next 30 days
               </p>
@@ -100,6 +116,7 @@ export function UpcomingCharges() {
       <NewSubscriptionDialog
         open={isAddSubscriptionOpen}
         onOpenChange={setIsAddSubscriptionOpen}
+        onSubscriptionAdded={handleSubscriptionAdded}
       />
     </>
   );
