@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap, Shield, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -6,20 +6,42 @@ import { SignInDialog } from "@/components/auth/SignInDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { fadeInUpVariants, scaleInVariants, slideUpVariants, containerVariants } from "@/lib/animations";
+import { CelebrationAnimation } from "./CelebrationAnimation";
 
 export function HeroSection() {
   const navigate = useNavigate();
   const [showSignInDialog, setShowSignInDialog] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const { toast } = useToast();
 
   const handleSignInSuccess = () => {
     setShowSignInDialog(false);
-    navigate("/app");
+    setShowCelebration(true);
+    setTimeout(() => {
+      navigate("/app");
+    }, 1500);
     toast({
       title: "Welcome!",
       description: "Successfully signed in to your account.",
     });
   };
+
+  const handleCelebrationComplete = () => {
+    setShowCelebration(false);
+  };
+
+  const triggerCelebration = () => {
+    setShowCelebration(true);
+  };
+
+  // Trigger celebration animation on page load/refresh
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowCelebration(true);
+    }, 1000); // Delay to let the page load animations complete first
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <section className="relative py-20 md:py-32 overflow-hidden">
@@ -114,9 +136,10 @@ export function HeroSection() {
             <Button
               variant="outline"
               size="lg"
+              onClick={triggerCelebration}
               className="px-8 py-3 text-base font-medium text-blue-700 bg-white border border-blue-300 rounded-lg shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              View Demo
+              🎉 Try Celebration
             </Button>
           </motion.div>
         </motion.div>
@@ -171,6 +194,12 @@ export function HeroSection() {
         onOpenChange={setShowSignInDialog}
         onSignInSuccess={handleSignInSuccess}
         defaultTab="signin"
+      />
+      
+      <CelebrationAnimation
+        isActive={showCelebration}
+        onComplete={handleCelebrationComplete}
+        duration={3000}
       />
     </section>
   );

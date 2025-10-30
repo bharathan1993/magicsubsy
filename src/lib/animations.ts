@@ -158,3 +158,90 @@ export const fastTransition = {
   duration: 0.3,
   ease: "easeOut"
 };
+
+// Celebration animation variants
+export const celebrationVariants: Variants = {
+  hidden: { opacity: 0, scale: 0 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+      type: "spring",
+      stiffness: 200,
+      damping: 15
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeIn"
+    }
+  }
+};
+
+export const confettiVariants: Variants = {
+  hidden: { y: -100, opacity: 0, rotate: 0 },
+  visible: {
+    y: window.innerHeight + 100,
+    opacity: [0, 1, 1, 0],
+    rotate: 720,
+    transition: {
+      duration: 3,
+      ease: "easeIn"
+    }
+  }
+};
+
+export const sparkleVariants: Variants = {
+  hidden: { scale: 0, rotate: 0, opacity: 0 },
+  visible: {
+    scale: [0, 1.5, 1, 1.2, 0],
+    rotate: [0, 180, 360],
+    opacity: [0, 1, 1, 1, 0],
+    transition: {
+      duration: 2,
+      ease: "easeInOut"
+    }
+  }
+};
+
+export const burstVariants: Variants = {
+  hidden: { scale: 0, opacity: 0 },
+  visible: {
+    scale: [0, 2, 1.5, 0],
+    opacity: [0, 1, 0.8, 0],
+    transition: {
+      duration: 1.5,
+      ease: "easeOut"
+    }
+  }
+};
+
+export const floatingTextVariants: Variants = {
+  hidden: { y: 50, opacity: 0, scale: 0.5 },
+  visible: {
+    y: -50,
+    opacity: [0, 1, 1, 0],
+    scale: [0.5, 1.2, 1, 0.8],
+    transition: {
+      duration: 2,
+      ease: "easeOut"
+    }
+  }
+};
+
+export const radiatingCircleVariants: Variants = {
+  hidden: { scale: 0, opacity: 1 },
+  visible: {
+    scale: 3,
+    opacity: 0,
+    transition: {
+      duration: 1.5,
+      ease: "easeOut"
+    }
+  }
+};
